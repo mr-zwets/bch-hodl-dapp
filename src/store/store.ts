@@ -23,10 +23,14 @@ export const useStore = defineStore('store', () => {
   const bchBalance = computed(() => userUtxos.value?.reduce((acc, utxo) => acc + utxo.satoshis, 0n))
 
   // Hodl Contracts
-  const provider = new ElectrumNetworkProvider('mainnet')
+  const fetchAllHodlContractsStatus = ref(null as Promise<void> | null)
   const allHodlContracts = ref(undefined as undefined | OnChainDataHodlContract[])
 
+  const provider = new ElectrumNetworkProvider('mainnet')
+
   initializeWalletConnect()
+
+  fetchAllHodlContractsStatus.value = scanHodlContracts()
 
   function waitForConnection(): Promise<void> {
     if (walletConnected.value) return Promise.resolve()
@@ -96,8 +100,6 @@ export const useStore = defineStore('store', () => {
     userUtxos.value = await provider.getUtxos(userAddress.value)
   })
 
-  scanHodlContracts()
-
   async function scanHodlContracts() {
     const chaingraphResult = await fetchHodlContracts()
     allHodlContracts.value = chaingraphResult
@@ -109,6 +111,7 @@ export const useStore = defineStore('store', () => {
     walletConnectModal,
     provider,
     userAddress,
+    fetchAllHodlContractsStatus,
     allHodlContracts,
     walletConnected,
     userUtxos,

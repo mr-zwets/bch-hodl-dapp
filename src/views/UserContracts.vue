@@ -10,6 +10,7 @@ const userContractBalances = ref(undefined as bigint[] | undefined);
 
 onMounted(async () => {
   await store.waitForConnection()
+  await store.fetchAllHodlContractsStatus
   if(!store.userAddress) return
   const userPkh = decodeCashAddress(store.userAddress)
   if(typeof userPkh == 'string') return
@@ -50,14 +51,6 @@ async function getUserContractBalances(){
   console.log(balances)
   userContractBalances.value = balances
 }
-
-getUserHodlContracts()
-
-watch(() => store.allHodlContracts, () => {
-  if(store.allHodlContracts != undefined){
-    getUserHodlContracts()
-  }
-})
 
 </script>
 
