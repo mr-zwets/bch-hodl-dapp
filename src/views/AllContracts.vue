@@ -38,6 +38,7 @@ watch(() => store.allHodlContracts, () => {
 </script>
 
 <template>
+  <h2 style="margin-bottom: 10px;">All HODL Contracts</h2>
   <div v-if="store.allHodlContracts == undefined">
     Loading...
   </div>

@@ -12,6 +12,8 @@
   },
   "dependencies": {
     "@bitauth/libauth": "^3.0.0",
+    "@walletconnect/modal": "^2.7.0",
+    "@walletconnect/sign-client": "^2.18.1",
     "cashscript": "^0.10.5",
     "chaingraph-ts": "^0.2.3",
     "events": "^3.3.0",

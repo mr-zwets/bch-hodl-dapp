@@ -1,7 +1,6 @@
 import { ChaingraphClient, graphql } from "chaingraph-ts"
 import type { OnChainDataHodlContract } from "./utils";
-
-const chaingraphUrl = "https://gql.chaingraph.pat.mn/v1/graphql"
+import { chaingraphUrl } from "@/config";
 
 const chaingraphClient = new ChaingraphClient(chaingraphUrl)
 
