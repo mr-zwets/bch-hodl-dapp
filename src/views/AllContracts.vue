@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { formatTimestamp, parseOpreturn, satsToBchAmount } from '@/utils/utils';
 import { useStore } from '../store/store';
-import { ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 const store = useStore()
 
 interface DisplayContracts {
@@ -9,8 +9,19 @@ interface DisplayContracts {
   biggestValue: {timelock: string, satoshis: number}[]
 }
 
+interface ActiveHodlContract {
+  timelock: string
+  satoshis: number
+  isSpent: boolean
+}
+
 const displayContracts = ref(undefined as DisplayContracts | undefined)
+const activeContracts = ref(undefined as ActiveHodlContract[] | undefined)
 const tvlContracts = ref(undefined as number | undefined)
+const tvlActiveContracts = computed(() => {
+  if(activeContracts.value == undefined) return
+  return activeContracts.value.reduce((acc, curr) => acc + Number(curr.satoshis), 0)
+})
 
 function getDisplayContracts() {
   if(store.allHodlContracts == undefined) return
@@ -20,9 +31,10 @@ function getDisplayContracts() {
     const opreturnData = hodlContract.opReturn
     const locktime = parseOpreturn(opreturnData)
     const contractOutput = hodlContract.outputs.find(output => output.locking_bytecode.startsWith('a9'))
-    infoHodlContracts.push({timelock: locktime, satoshis: contractOutput!.value_satoshis})
+    infoHodlContracts.push({timelock: locktime, satoshis: contractOutput!.value_satoshis, isSpent: contractOutput!.spent})
   }
   tvlContracts.value = infoHodlContracts.reduce((acc, curr) => acc + Number(curr.satoshis), 0)
+  activeContracts.value = infoHodlContracts.filter(contract => !contract.isSpent)
   const longestTimeLocks = [...infoHodlContracts].sort((a, b) => Number(b.timelock) - Number(a.timelock)).slice(0, 3)
   const biggestValue = [...infoHodlContracts].sort((a, b) => b.satoshis - a.satoshis).slice(0, 3)
   displayContracts.value = { longestTimeLocks,biggestValue }
@@ -43,8 +55,13 @@ watch(() => store.allHodlContracts, () => {
     Loading...
   </div>
   <div v-if="store.allHodlContracts?.length && tvlContracts">
-    <div>total HODL contract created: {{ store.allHodlContracts.length }}</div>
-    <div>combined TVL HODL contracts: {{ satsToBchAmount(tvlContracts).toFixed(0) + ' BCH' }} </div>
+    <div>Active HODL contracts: {{ activeContracts?.length }}</div>
+    <div>Current TVL HODL contracts: 
+      <span v-if="tvlActiveContracts">{{ satsToBchAmount(tvlActiveContracts).toFixed(0) + ' BCH' }} </span>
+    </div>
+    <br/>
+    <div>Total HODL contract created: {{ store.allHodlContracts.length }}</div>
+    <div>Total TVL HODL contracts: {{ satsToBchAmount(tvlContracts).toFixed(0) + ' BCH' }} </div>
     
 
     <div v-if="displayContracts" style="margin-top: 20px;">

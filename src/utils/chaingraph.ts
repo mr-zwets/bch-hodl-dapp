@@ -22,6 +22,9 @@ export async function fetchHodlContracts(){
         outputs {
           locking_bytecode
           value_satoshis
+          spent_by {
+            outpoint_transaction_hash
+        }
         }
       }
     }
@@ -38,7 +41,8 @@ export async function fetchHodlContracts(){
     opReturn: output.locking_bytecode.slice(2),
     outputs: output.transaction.outputs.map((outputInfo: any) => ({
       locking_bytecode: outputInfo.locking_bytecode.slice(2),
-      value_satoshis: outputInfo.value_satoshis
+      value_satoshis: outputInfo.value_satoshis,
+      spent: !outputInfo.spent_by.length
     }))
   }));
   return listContracts as OnChainDataHodlContract[]

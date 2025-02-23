@@ -76,7 +76,8 @@ async function getUserContractBalances(){
           </div> 
       </div>
       <div v-else>
-        No hodl contracts found
+        No HODL contracts found... <br/>
+        Note that the dapp only checks your connected address
       </div>
     </div>
 

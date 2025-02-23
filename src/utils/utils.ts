@@ -42,5 +42,6 @@ export interface OnChainDataHodlContract {
   outputs: {
     locking_bytecode: string;
     value_satoshis: number;
+    spent: boolean
   }[];
 }

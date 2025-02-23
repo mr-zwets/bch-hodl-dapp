@@ -19,7 +19,7 @@ const store = useStore()
           <RouterLink to="/create-contract">Create Contract</RouterLink>
         </nav>
       </div>
-      <div class="addressInfo" style="margin-left: 180px;">
+      <div class="addressInfo" style="margin-left: 150px;">
       <div class="balance">
         <span>
           <wcButton />
@@ -35,7 +35,7 @@ const store = useStore()
       </div>
     </div>
     </div>
-    <h3>Fully compatible with the Electron-Cash Plugin!</h3>
+    <h3>A smart contract to timelock your Bitcoin Cash!</h3>
   </header>
 </template>
 
