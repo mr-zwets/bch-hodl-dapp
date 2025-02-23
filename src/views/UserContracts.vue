@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import { Contract, ElectrumNetworkProvider } from 'cashscript';
-import { binToUtf8, hexToBin, lockingBytecodeToCashAddress } from '@bitauth/libauth';
-import { constructArtifactWithParams, type OnChainDataHodlContract } from '../utils/utils';
-import { fetchHodlContracts } from '../utils/chaingraph';
+import { hexToBin, lockingBytecodeToCashAddress } from '@bitauth/libauth';
+import { constructArtifactWithParams, parseOpreturn, type OnChainDataHodlContract } from '../utils/utils';
+import { useStore } from '../store/store';
+const store = useStore()
 
 const pkhInput = ref('edaab961e6daaa47574fc875b67d9e5c88d4a9a6');
 const userHodlContracts = ref(undefined as Contract[] | undefined);
@@ -18,16 +19,10 @@ function compileHodlContract(locktime: number | string, userPkh: string) {
   return newHodlContract
 }
 
-async function scanHodlContracts() {
-  const chaingraphResult = await fetchHodlContracts()
-  allHodlContracts.value = chaingraphResult
-  return chaingraphResult
-}
-
 async function getUserHodlContracts() {
-  const chaingraphResult = await scanHodlContracts()
   const listUserHodlContracts = []
-  for (const chaingraphItem of chaingraphResult) {
+  if(store.allHodlContracts == undefined) return
+  for (const chaingraphItem of store.allHodlContracts) {
     const opreturnData = chaingraphItem.opReturn
     const locktime = parseOpreturn(opreturnData)
     const newHodlContract = compileHodlContract(locktime, pkhInput.value)
@@ -45,29 +40,16 @@ async function getUserHodlContracts() {
   userHodlContracts.value = listUserHodlContracts
 }
 
-function parseOpreturn(opreturnData: string) {
-  const truncatedOpreturn = opreturnData.split("04686f646c")[1];
-  const lengthAddressHex = truncatedOpreturn.slice(0, 2);
-  const lengthAddress = parseInt(lengthAddressHex, 16);
-  const truncatedOpreturn2 = truncatedOpreturn.slice(2 + lengthAddress * 2);
-  const lengthLocktimeHex = truncatedOpreturn2.slice(0, 2);
-  const lengthLocktime = parseInt(lengthLocktimeHex, 16);
-  const locktimeEncoded = truncatedOpreturn2.slice(2, 2 + lengthLocktime * 2 );
-  const locktime = binToUtf8(hexToBin(locktimeEncoded));
-  return locktime;
-}
-getUserHodlContracts()
+watch(() => store.allHodlContracts, () => {
+  if(store.allHodlContracts != undefined){
+    getUserHodlContracts()
+  }
+})
 
 </script>
 
 <template>
-  <header>
-    <h1>BCH Hodl Dapp 💎</h1>
-    <h3>Fully compatible with the Electron-Cash Plugin!</h3>
-  </header>
-
-  <main style="margin-top: 20px">
-    
+  <main>
     <div>
       pubkeyhash: <input v-model="pkhInput" placeholder="locktime" style="width: 350px;"/>
     </div>
