@@ -54,7 +54,7 @@ watch(() => store.allHodlContracts, () => {
   <div v-if="store.allHodlContracts == undefined">
     Loading...
   </div>
-  <div v-if="store.allHodlContracts?.length && tvlContracts">
+  <div v-if="store.allHodlContracts != undefined && tvlContracts != undefined">
     <div>Active HODL contracts: {{ activeContracts?.length }}</div>
     <div>Current TVL HODL contracts: 
       <span v-if="tvlActiveContracts">{{ satsToBchAmount(tvlActiveContracts).toFixed(0) + ' BCH' }} </span>
@@ -62,7 +62,6 @@ watch(() => store.allHodlContracts, () => {
     <br/>
     <div>Total HODL contract created: {{ store.allHodlContracts.length }}</div>
     <div>Total TVL HODL contracts: {{ satsToBchAmount(tvlContracts).toFixed(0) + ' BCH' }} </div>
-    
 
     <div v-if="displayContracts" style="margin-top: 20px;">
       <h3 style="margin: 4px 0px;">Biggest Value</h3>

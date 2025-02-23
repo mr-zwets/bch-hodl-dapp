@@ -1,6 +1,6 @@
-import type { Artifact } from 'cashscript';
+import type { Artifact, Utxo } from 'cashscript';
 import hodlArtifact from '../artifact.json' with { type: 'json' };
-import { bigIntToVmNumber, binToHex, binToUtf8, decodeCashAddress, hexToBin } from '@bitauth/libauth'
+import { addressContentsToLockingBytecode, bigIntToVmNumber, binToHex, binToUtf8, decodeCashAddress, hexToBin } from '@bitauth/libauth'
 
 // The hodlArtifact contains a template variables for <locktime> and <pubkeyhash>
 // which we need to replace with the actual values for those params
@@ -33,6 +33,12 @@ export function convertAddressToPkh(userAddress: string){
   return userPkhHex
 }
 
+export function convertPkhToLockingBytecode(userPkh: string){
+  const userPkhBin = hexToBin(userPkh)
+  const userLockingBytecode = addressContentsToLockingBytecode({type:"P2PKH", payload:userPkhBin})
+  return userLockingBytecode
+}
+
 export function formatTimestamp(unixTimestamp: string){
   if(Number(unixTimestamp) > 500_000_000){
     const date = new Date(Number(unixTimestamp) * 1000);
@@ -45,6 +51,10 @@ export function formatTimestamp(unixTimestamp: string){
 }
 
 export const satsToBchAmount = (sats: number) => sats / 100_000_000;
+
+export function getBalance(utxos: Utxo[]): bigint {
+  return utxos.reduce((acc, utxo) => acc + utxo.satoshis, 0n);
+}
 
 export interface OnChainDataHodlContract {
   txid: string;

@@ -1,5 +1,5 @@
 
-const network = "mainnet" as ("chipnet" | "mainnet")
+const network = "chipnet" as ("chipnet" | "mainnet")
 
 const connectedChain = network == "mainnet" ? "bch:bitcoincash" : "bch:bchtest";
 const requiredNamespaces = {

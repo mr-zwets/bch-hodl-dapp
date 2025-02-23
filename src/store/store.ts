@@ -4,8 +4,12 @@ import SignClient from '@walletconnect/sign-client';
 import { WalletConnectModal } from '@walletconnect/modal';
 import { fetchHodlContracts } from '@/utils/chaingraph'
 import type { OnChainDataHodlContract } from '@/utils/utils'
-import { wcModalConfig, projectId, wcMetadata } from "@/config";
+import { wcModalConfig, projectId, wcMetadata, connectedChain, network } from "@/config";
 import { ElectrumNetworkProvider, type Utxo } from 'cashscript';
+import type { signedTxObject } from '@/utils/wcUtils';
+import { stringify } from '@bitauth/libauth';
+// @ts-ignore
+import { ElectrumCluster, ElectrumTransport } from "electrum-cash"
 
 export const useStore = defineStore('store', () => {
   // Create WC modal
@@ -33,7 +37,12 @@ export const useStore = defineStore('store', () => {
   })
 
 
-  const provider = new ElectrumNetworkProvider('mainnet')
+    // Explicitly create a custom 1-of-1 electrum cluster
+  const electrumClusterChipnet = new ElectrumCluster('CashScript Application', '1.4.1', 1, 1);
+  // add server to cluster with autoconnect=false
+  electrumClusterChipnet.addServer('chipnet.bch.ninja',ElectrumTransport.WSS.Port, ElectrumTransport.WSS.Scheme, false);
+  // Initialise cashscript ElectrumNetworkProvider
+  const provider = new ElectrumNetworkProvider(network, electrumClusterChipnet);
 
   initializeWalletConnect()
 
@@ -98,6 +107,24 @@ export const useStore = defineStore('store', () => {
     signingClient.value = signClient
   }
 
+  async function signTransaction(wcTransactionObj: any): Promise<signedTxObject | undefined> {
+    console.log('signTransaction')
+    try {
+      const result = await signingClient.value?.request({
+        chainId: connectedChain,
+        topic: session.value?.topic,
+        request: {
+          method: "bch_signTransaction",
+          params: JSON.parse(stringify(wcTransactionObj)),
+        },
+      });
+      return result as signedTxObject;
+    } catch (error) {
+      console.error('Error signing transaction:', error)
+      return undefined;
+    }
+  }
+
   function resetSessionUserState() {
     session.value = undefined
     userAddress.value = undefined
@@ -129,6 +156,7 @@ export const useStore = defineStore('store', () => {
     walletConnected,
     userUtxos,
     bchBalance,
+    signTransaction,
     resetSessionUserState,
     waitForConnection,
     scanHodlContracts
