@@ -89,6 +89,7 @@ async function proposeWcTransaction(){
   // reset inputs
   locktimeInput.value = ''
   bchAmountInput.value = ''
+  store.scanHodlContracts()
 }
 </script>
 

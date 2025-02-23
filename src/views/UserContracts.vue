@@ -2,7 +2,7 @@
 import { onMounted, ref } from 'vue';
 import { Contract, type Output, TransactionBuilder  } from 'cashscript';
 import { binToHex, decodeCashAddress, decodeTransaction, hexToBin, lockingBytecodeToCashAddress} from '@bitauth/libauth';
-import { constructArtifactWithParams, convertAddressToPkh, formatTimestamp, parseOpreturn, satsToBchAmount } from '../utils/utils';
+import { constructArtifactWithParams, convertAddressToPkh, formatTimestamp, getBalance, parseOpreturn, satsToBchAmount } from '../utils/utils';
 import { useStore } from '../store/store';
 import { network } from '@/config';
 import { createWcContractObj, generateSourceOutputs, type signedTxObject } from '@/utils/wcUtils';
@@ -59,6 +59,7 @@ async function getUserHodlContracts(userPkh: string) {
 async function getUserContractBalances(){
   if (userHodlContracts.value == undefined) return
   const balances = await Promise.all(userHodlContracts.value.map(contract => contract.getBalance()))
+  console.log(balances)
   userContractBalances.value = balances
 }
 
@@ -71,12 +72,9 @@ async function unlockHodlVault(locktime: number){
   const hodlContract = new Contract(hodlArtifactWithParams, [], contractOptions);
 
   const contractUtxos = await hodlContract.getUtxos()
+  const contractBalance = getBalance(contractUtxos)
 
-  // TODO: support multipl contract UTXOs
-  if(contractUtxos.length != 1) throw new Error("Only one contract UTXO supported")
-  const contractUtxo = contractUtxos[0]
-
-  const reclaimAmount = contractUtxo.satoshis - 500n
+  const reclaimAmount = contractBalance - 500n - BigInt(100 * contractUtxos.length)
   const reclaimOutput: Output = { to: store.userAddress, amount: reclaimAmount }
 
   const placeholderSig = Uint8Array.from(Array(65))
@@ -85,7 +83,7 @@ async function unlockHodlVault(locktime: number){
   const transactionBuilder = new TransactionBuilder({provider: store.provider})
 
   transactionBuilder.setLocktime(store.currentBlockHeight)
-  transactionBuilder.addInput(contractUtxo, hodlContract.unlock.spend(placeholderPubKey, placeholderSig))
+  transactionBuilder.addInputs(contractUtxos, hodlContract.unlock.spend(placeholderPubKey, placeholderSig))
   transactionBuilder.addOutput(reclaimOutput)
 
   const unsignedRawTransactionHex = transactionBuilder.build();
@@ -114,6 +112,8 @@ async function unlockHodlVault(locktime: number){
   const successMessage = `Succesfully reclaimed HODLed value! txid: ${signResult.signedTransactionHash}`
   alert(successMessage);
   console.log(successMessage);
+
+  store.scanHodlContracts()
 }
 </script>
 
@@ -128,11 +128,11 @@ async function unlockHodlVault(locktime: number){
         Loading...
       </div>
       <div v-else-if="userHodlContracts?.length">
-        Found {{ userHodlContracts?.length }} hodl {{ userHodlContracts?.length > 1 ? 'contracts' : 'contract' }} <br/>
-          <div v-for="(userHodlContract, index) in userHodlContracts" :key="userHodlContract.address" style="margin: 5px 0;">
+        Found {{ userHodlContracts?.length }} hodl {{ userHodlContracts?.length > 1 ? 'contracts' : 'contract' }}:
+          <div v-for="(userHodlContract, index) in userHodlContracts" :key="userHodlContract.address" style="margin: 14px 0;">
             contract address: {{ userHodlContract?.address }} <br/>
             contract balance: <span v-if="userContractBalances">
-               {{ satsToBchAmount(Number(userContractBalances[index])) +  network == "mainnet" ? "BCH" : "tBCH"  }}
+              {{ satsToBchAmount(Number(userContractBalances[index])) }} {{ network == "mainnet" ? "BCH" : "tBCH" }}
             </span>
             <span v-else>loading...</span><br/>
             contract locktime: {{ formatTimestamp(userHodlContract?.locktime) }} <br/>
@@ -143,7 +143,7 @@ async function unlockHodlVault(locktime: number){
             <span v-else-if="userContractBalances && userHodlContract.locktime < store.currentBlockHeight">
               funds spendable!
             </span>
-            <div v-if="userContractBalances && store.currentBlockHeight && userHodlContract.locktime < store.currentBlockHeight" style="margin-top: 10px;">
+            <div v-if="userContractBalances && Number(userContractBalances[index]) && store.currentBlockHeight && userHodlContract.locktime < store.currentBlockHeight" style="margin-top: 10px;">
               <button @click="() => unlockHodlVault(userHodlContract.locktime)" style="cursor: pointer;">
                 Reclaim To Wallet
               </button>
