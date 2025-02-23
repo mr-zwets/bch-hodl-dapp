@@ -39,7 +39,7 @@ export function convertPkhToLockingBytecode(userPkh: string){
   return userLockingBytecode
 }
 
-export function formatTimestamp(unixTimestamp: string){
+export function formatTimestamp(unixTimestamp: string | number) {
   if(Number(unixTimestamp) > 500_000_000){
     const date = new Date(Number(unixTimestamp) * 1000);
     const year = date.getUTCFullYear();
