@@ -13,6 +13,7 @@
   "dependencies": {
     "@bitauth/libauth": "^3.0.0",
     "cashscript": "^0.10.5",
+    "chaingraph-ts": "^0.2.3",
     "events": "^3.3.0",
     "vue": "^3.5.13"
   },

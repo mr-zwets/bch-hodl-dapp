@@ -2,6 +2,19 @@
 # yarn lockfile v1
 
 
+"@0no-co/graphql.web@^1.0.5":
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/@0no-co/graphql.web/-/graphql.web-1.1.1.tgz#6670b0897ee222e10f46c3b45fe5b43b90504fcd"
+  integrity sha512-F2i3xdycesw78QCOBHmpTn7eaD2iNXGwB2gkfwxcOfBbeauYpr8RBSyJOkDrFtKtVRMclg8Sg3n1ip0ACyUuag==
+
+"@0no-co/graphqlsp@^1.12.13":
+  version "1.12.16"
+  resolved "https://registry.yarnpkg.com/@0no-co/graphqlsp/-/graphqlsp-1.12.16.tgz#58fe7bad53b3ad9fdf2d5f41ddeb9b418d289a03"
+  integrity sha512-B5pyYVH93Etv7xjT6IfB7QtMBdaaC07yjbhN6v8H7KgFStMkPvi+oWYBTibMFRMY89qwc9H8YixXg8SXDVgYWw==
+  dependencies:
+    "@gql.tada/internal" "^1.0.0"
+    graphql "^15.5.0 || ^16.0.0 || ^17.0.0"
+
 "@babel/helper-string-parser@^7.25.9":
   version "7.25.9"
   resolved "https://registry.yarnpkg.com/@babel/helper-string-parser/-/helper-string-parser-7.25.9.tgz#1aabb72ee72ed35789b4bbcad3ca2862ce614e8c"
@@ -164,6 +177,22 @@
   resolved "https://registry.yarnpkg.com/@esbuild/win32-x64/-/win32-x64-0.24.2.tgz#34aa0b52d0fbb1a654b596acfa595f0c7b77a77b"
   integrity sha512-7VTgWzgMGvup6aSqDPLiW5zHaxYJGTO4OokMjIlrCtf+VpEL+cXKtCvg723iguPYI5oaUNdS+/V7OU2gvXVWEg==
 
+"@gql.tada/cli-utils@1.6.3":
+  version "1.6.3"
+  resolved "https://registry.yarnpkg.com/@gql.tada/cli-utils/-/cli-utils-1.6.3.tgz#b893cec74908da4df0602691e2e0b1497fda8cda"
+  integrity sha512-jFFSY8OxYeBxdKi58UzeMXG1tdm4FVjXa8WHIi66Gzu9JWtCE6mqom3a8xkmSw+mVaybFW5EN2WXf1WztJVNyQ==
+  dependencies:
+    "@0no-co/graphqlsp" "^1.12.13"
+    "@gql.tada/internal" "1.0.8"
+    graphql "^15.5.0 || ^16.0.0 || ^17.0.0"
+
+"@gql.tada/internal@1.0.8", "@gql.tada/internal@^1.0.0":
+  version "1.0.8"
+  resolved "https://registry.yarnpkg.com/@gql.tada/internal/-/internal-1.0.8.tgz#3ba9fa6534809788bbbe103492f70b8e9d754027"
+  integrity sha512-XYdxJhtHC5WtZfdDqtKjcQ4d7R1s0d1rnlSs3OcBEUbYiPoJJfZU7tWsVXuv047Z6msvmr4ompJ7eLSK5Km57g==
+  dependencies:
+    "@0no-co/graphql.web" "^1.0.5"
+
 "@jridgewell/sourcemap-codec@^1.5.0":
   version "1.5.0"
   resolved "https://registry.yarnpkg.com/@jridgewell/sourcemap-codec/-/sourcemap-codec-1.5.0.tgz#3188bcb273a414b0d215fd22a58540b989b9409a"
@@ -292,6 +321,14 @@
   integrity sha512-JQbbmxZTZehdc2iszGKs5oC3NFnjeay7mtAWrdt7qNtAVK0g19muApzAy4bm9byz79xa2ZnO/BOBC2R8RC5Lww==
   dependencies:
     "@types/node" "*"
+
+"@urql/core@^5.0.8":
+  version "5.1.0"
+  resolved "https://registry.yarnpkg.com/@urql/core/-/core-5.1.0.tgz#7f4b81f1aba1ca34ae6354763abeb87ff9af84ff"
+  integrity sha512-yC3sw8yqjbX45GbXxfiBY8GLYCiyW/hLBbQF9l3TJrv4ro00Y0ChkKaD9I2KntRxAVm9IYBqh0awX8fwWAe/Yw==
+  dependencies:
+    "@0no-co/graphql.web" "^1.0.5"
+    wonka "^6.3.2"
 
 "@vitejs/plugin-vue@^5.2.1":
   version "5.2.1"
@@ -468,6 +505,17 @@ cashscript@^0.10.5:
     fast-deep-equal "^3.1.3"
     pako "^2.1.0"
 
+chaingraph-ts@^0.2.3:
+  version "0.2.3"
+  resolved "https://registry.yarnpkg.com/chaingraph-ts/-/chaingraph-ts-0.2.3.tgz#0d6a029fe8a0d99934431f4eda18771297825e7e"
+  integrity sha512-21lJoTaXMrp0pBZX1Cl51TdIUY5OIUZ7dXYRO9jY+Tpgjkc882cQpWMZw+LPqE3sHbgXkMfQEepEwbI7Hay3CA==
+  dependencies:
+    "@bitauth/libauth" "^3.0.0"
+    "@urql/core" "^5.0.8"
+    gql.tada "^1.8.10"
+    graphql-ws "^5.16.0"
+    ws "^8.18.0"
+
 cross-spawn@^7.0.6:
   version "7.0.6"
   resolved "https://registry.yarnpkg.com/cross-spawn/-/cross-spawn-7.0.6.tgz#8a58fe78f00dcd70c370451759dfbfaf03e8ee9f"
@@ -565,6 +613,26 @@ fsevents@~2.3.2, fsevents@~2.3.3:
   version "2.3.3"
   resolved "https://registry.yarnpkg.com/fsevents/-/fsevents-2.3.3.tgz#cac6407785d03675a2a5e1a5305c697b347d90d6"
   integrity sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw==
+
+gql.tada@^1.8.10:
+  version "1.8.10"
+  resolved "https://registry.yarnpkg.com/gql.tada/-/gql.tada-1.8.10.tgz#096a1b30d3c6fc74212fe07d507f01a4095f7f67"
+  integrity sha512-FrvSxgz838FYVPgZHGOSgbpOjhR+yq44rCzww3oOPJYi0OvBJjAgCiP6LEokZIYND2fUTXzQAyLgcvgw1yNP5A==
+  dependencies:
+    "@0no-co/graphql.web" "^1.0.5"
+    "@0no-co/graphqlsp" "^1.12.13"
+    "@gql.tada/cli-utils" "1.6.3"
+    "@gql.tada/internal" "1.0.8"
+
+graphql-ws@^5.16.0:
+  version "5.16.2"
+  resolved "https://registry.yarnpkg.com/graphql-ws/-/graphql-ws-5.16.2.tgz#7b0306c1bdb0e97a05e800ccd523f46fb212e37c"
+  integrity sha512-E1uccsZxt/96jH/OwmLPuXMACILs76pKF2i3W861LpKBCYtGIyPQGtWLuBLkND4ox1KHns70e83PS4te50nvPQ==
+
+"graphql@^15.5.0 || ^16.0.0 || ^17.0.0":
+  version "16.10.0"
+  resolved "https://registry.yarnpkg.com/graphql/-/graphql-16.10.0.tgz#24c01ae0af6b11ea87bf55694429198aaa8e220c"
+  integrity sha512-AjqGKbDGUFRKIRCP9tCKiIGHyriz2oHEbPIbEtcSLSs4YjReZOIPQQWek4+6hjw62H9QShXHyaGivGiYVLeYFQ==
 
 he@^1.2.0:
   version "1.2.0"
@@ -800,7 +868,17 @@ which@^5.0.0:
   dependencies:
     isexe "^3.1.1"
 
+wonka@^6.3.2:
+  version "6.3.4"
+  resolved "https://registry.yarnpkg.com/wonka/-/wonka-6.3.4.tgz#76eb9316e3d67d7febf4945202b5bdb2db534594"
+  integrity sha512-CjpbqNtBGNAeyNS/9W6q3kSkKE52+FjIj7AkFlLr11s/VWGUu6a2CdYSdGxocIhIVjaW/zchesBQUKPVU69Cqg==
+
 ws@^7.5.2:
   version "7.5.10"
   resolved "https://registry.yarnpkg.com/ws/-/ws-7.5.10.tgz#58b5c20dc281633f6c19113f39b349bd8bd558d9"
   integrity sha512-+dbF1tHwZpXcbOJdVOkzLDxZP1ailvSxM6ZweXTegylPny803bFhA+vqBYw4s31NSAk4S2Qz+AKXK9a4wkdjcQ==
+
+ws@^8.18.0:
+  version "8.18.1"
+  resolved "https://registry.yarnpkg.com/ws/-/ws-8.18.1.tgz#ea131d3784e1dfdff91adb0a4a116b127515e3cb"
+  integrity sha512-RKW2aJZMXeMxVpnZ6bck+RswznaxmzdULiBr6KY7XkTnW8uvt0iT9H5DkHUChXrc+uurzwa0rVI16n/Xzjdz1w==

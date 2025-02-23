@@ -12,3 +12,13 @@ export function constructArtifactWithParams(pkhHex:string, locktime:bigint){
     .replace('<pubkeyhash>', pkhHex);
   return JSON.parse(artifactWithParams) as Artifact
 }
+
+
+export interface OnChainDataHodlContract {
+  txid: string;
+  opReturn: string;
+  outputs: {
+    locking_bytecode: string;
+    value_satoshis: number;
+  }[];
+}
