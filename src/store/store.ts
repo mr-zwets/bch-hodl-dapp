@@ -37,12 +37,12 @@ export const useStore = defineStore('store', () => {
   })
 
 
-    // Explicitly create a custom 1-of-1 electrum cluster
+  // Explicitly create a custom 1-of-1 electrum cluster for chipnet
   const electrumClusterChipnet = new ElectrumCluster('CashScript Application', '1.4.1', 1, 1);
   // add server to cluster with autoconnect=false
   electrumClusterChipnet.addServer('chipnet.bch.ninja',ElectrumTransport.WSS.Port, ElectrumTransport.WSS.Scheme, false);
   // Initialise cashscript ElectrumNetworkProvider
-  const provider = new ElectrumNetworkProvider(network, electrumClusterChipnet);
+  const provider = new ElectrumNetworkProvider(network, network == "chipnet" ? electrumClusterChipnet : undefined);
 
   initializeWalletConnect()
 

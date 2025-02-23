@@ -57,7 +57,8 @@ async function proposeWcTransaction(){
   const transactionBuilder = new TransactionBuilder({provider: store.provider})
   transactionBuilder.addInputs(userInputUtxos, placeholderUnlocker)
   transactionBuilder.addOpReturnOutput(opreturnData)
-  transactionBuilder.addOutputs([contractOutput, changeOutput])
+  transactionBuilder.addOutput(contractOutput)
+  if(changeAmount > 550n) transactionBuilder.addOutput(changeOutput)
   
   const unsignedRawTransactionHex = transactionBuilder.build();
 
@@ -84,6 +85,10 @@ async function proposeWcTransaction(){
   const successMessage = `Succesfully create a HODL contract! txid: ${signResult.signedTransactionHash}`
   alert(successMessage);
   console.log(successMessage);
+
+  // reset inputs
+  locktimeInput.value = ''
+  bchAmountInput.value = ''
 }
 </script>
 
