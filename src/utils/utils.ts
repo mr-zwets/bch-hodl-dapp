@@ -55,13 +55,3 @@ export const satsToBchAmount = (sats: number) => sats / 100_000_000;
 export function getBalance(utxos: Utxo[]): bigint {
   return utxos.reduce((acc, utxo) => acc + utxo.satoshis, 0n);
 }
-
-export interface OnChainDataHodlContract {
-  txid: string;
-  opReturn: string;
-  outputs: {
-    locking_bytecode: string;
-    value_satoshis: number;
-    spent: boolean
-  }[];
-}

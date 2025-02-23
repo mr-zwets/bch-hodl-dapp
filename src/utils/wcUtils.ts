@@ -1,4 +1,6 @@
-import type { UnlockableUtxo } from "cashscript";
+import type { ContractInfo } from "@/interfaces/interfaces";
+import { scriptToBytecode } from "@cashscript/utils";
+import type { Contract, UnlockableUtxo } from "cashscript";
 import { cashScriptOutputToLibauthOutput } from "cashscript/dist/utils";
 
 export interface signedTxObject {
@@ -18,4 +20,15 @@ export const generateSourceOutputs = (inputs: UnlockableUtxo[]) => {
     return cashScriptOutputToLibauthOutput(sourceOutput);
   });
   return sourceOutputs
+}
+
+export const createWcContractObj = (contract:Contract, abiFunctionIndex:number) => {
+  const wcContractObj:ContractInfo = {
+    contract: {
+      abiFunction: contract.artifact.abi[abiFunctionIndex],
+      redeemScript: scriptToBytecode(contract.redeemScript),
+      artifact: contract.artifact,
+    }
+  }
+  return wcContractObj
 }

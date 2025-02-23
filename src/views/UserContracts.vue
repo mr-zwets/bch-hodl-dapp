@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
-import { Contract, type Unlocker, type Output, TransactionBuilder, SignatureTemplate  } from 'cashscript';
+import { Contract, type Output, TransactionBuilder  } from 'cashscript';
 import { binToHex, decodeCashAddress, decodeTransaction, hexToBin, lockingBytecodeToCashAddress} from '@bitauth/libauth';
 import { constructArtifactWithParams, convertAddressToPkh, formatTimestamp, parseOpreturn, satsToBchAmount } from '../utils/utils';
 import { useStore } from '../store/store';
 import { network } from '@/config';
-import { generateSourceOutputs, type signedTxObject } from '@/utils/wcUtils';
+import { createWcContractObj, generateSourceOutputs, type signedTxObject } from '@/utils/wcUtils';
+import type { wcSourceOutputs } from '@/interfaces/interfaces';
 const store = useStore();
 
 interface HodlContract extends ReturnType<typeof compileHodlContract>{
@@ -78,7 +79,7 @@ async function unlockHodlVault(locktime: number){
   const reclaimAmount = contractUtxo.satoshis - 500n
   const reclaimOutput: Output = { to: store.userAddress, amount: reclaimAmount }
 
-  const placeholderSig = new SignatureTemplate(Uint8Array.from(Array(32)));
+  const placeholderSig = Uint8Array.from(Array(65))
   const placeholderPubKey = Uint8Array.from(Array(33));
 
   const transactionBuilder = new TransactionBuilder({provider: store.provider})
@@ -94,8 +95,9 @@ async function unlockHodlVault(locktime: number){
 
   const sourceOutputs = generateSourceOutputs(transactionBuilder.inputs)
 
-  const wcSourceOutputs = sourceOutputs.map((sourceOutput, index) => {
-    return { ...sourceOutput, ...decodedTransaction.inputs[index] }
+  const wcSourceOutputs: wcSourceOutputs = sourceOutputs.map((sourceOutput, index) => {
+    const contractInfoWc = createWcContractObj(hodlContract, index)
+    return { ...sourceOutput, ...contractInfoWc, ...decodedTransaction.inputs[index] }
   })
 
   const wcTransactionObj = {

@@ -3,7 +3,7 @@ import { computed, ref, watch } from 'vue'
 import SignClient from '@walletconnect/sign-client';
 import { WalletConnectModal } from '@walletconnect/modal';
 import { fetchHodlContracts } from '@/utils/chaingraph'
-import type { OnChainDataHodlContract } from '@/utils/utils'
+import type { OnChainDataHodlContract } from '../interfaces/interfaces'
 import { wcModalConfig, projectId, wcMetadata, connectedChain, network } from "@/config";
 import { ElectrumNetworkProvider, type Utxo } from 'cashscript';
 import type { signedTxObject } from '@/utils/wcUtils';
