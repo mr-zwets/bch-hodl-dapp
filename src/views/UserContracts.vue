@@ -2,13 +2,13 @@
 import { ref, watch } from 'vue';
 import { Contract, ElectrumNetworkProvider } from 'cashscript';
 import { hexToBin, lockingBytecodeToCashAddress } from '@bitauth/libauth';
-import { constructArtifactWithParams, parseOpreturn, type OnChainDataHodlContract } from '../utils/utils';
+import { constructArtifactWithParams, parseOpreturn, satsToBchAmount } from '../utils/utils';
 import { useStore } from '../store/store';
 const store = useStore()
 
 const pkhInput = ref('edaab961e6daaa47574fc875b67d9e5c88d4a9a6');
 const userHodlContracts = ref(undefined as Contract[] | undefined);
-const allHodlContracts = ref(undefined as OnChainDataHodlContract[] | undefined);
+const userContractBalances = ref(undefined as bigint[] | undefined);
 
 const provider = new ElectrumNetworkProvider('mainnet')
 
@@ -38,7 +38,17 @@ async function getUserHodlContracts() {
     }
   }
   userHodlContracts.value = listUserHodlContracts
+  getUserContractBalances()
 }
+
+async function getUserContractBalances(){
+  if (userHodlContracts.value == undefined) return
+  const balances = await Promise.all(userHodlContracts.value.map(contract => contract.getBalance()))
+  console.log(balances)
+  userContractBalances.value = balances
+}
+
+getUserHodlContracts()
 
 watch(() => store.allHodlContracts, () => {
   if(store.allHodlContracts != undefined){
@@ -55,14 +65,21 @@ watch(() => store.allHodlContracts, () => {
     </div>
     <div>Todo: get pubkeyhash from WalletConnect</div><br/>
 
-
-    <div v-if="userHodlContracts?.length">
+    <div v-if="userHodlContracts == undefined">
+      Loading...
+    </div>
+    <div v-else-if="userHodlContracts?.length">
       Found {{ userHodlContracts?.length }} hodl {{ userHodlContracts?.length > 1 ? 'contracts' : 'contract' }} <br/>
-        <div v-for="userHodlContract in userHodlContracts" :key="userHodlContract.address">
+        <div v-for="(userHodlContract, index) in userHodlContracts" :key="userHodlContract.address">
           contract address: {{ userHodlContract?.address }} <br/>
+          <span v-if="userContractBalances">
+            contract balance: {{ satsToBchAmount(Number(userContractBalances[index])) }}
+          </span>
+          <span v-else>loading...</span>
+          
         </div> 
     </div>
-    <div v-else-if="userHodlContracts?.length == 0">
+    <div v-else>
       No hodl contracts found
     </div>
 

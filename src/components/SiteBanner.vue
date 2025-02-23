@@ -8,6 +8,7 @@
         <nav style="display: flex; gap: 20px;">
           <RouterLink to="/">All Contracts</RouterLink>
           <RouterLink to="/my-contracts">User Contracts</RouterLink>
+          <RouterLink to="/create-contract">Create Contract</RouterLink>
         </nav>
       </div>
     </div>

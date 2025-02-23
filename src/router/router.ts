@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import AllContractsView from '../views/AllContracts.vue'
 import UserContractsView from '../views/UserContracts.vue'
+import CreateContractView from '../views/CreateContract.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -19,6 +20,14 @@ const router = createRouter({
       component: UserContractsView,
       meta: {
         title: 'My Contracts | BCH Hodl Dapp',
+      }
+    },
+    {
+      path: '/create-contract',
+      name: 'create-contract',
+      component: CreateContractView,
+      meta: {
+        title: 'Create Contract | BCH Hodl Dapp',
       }
     },
   ]

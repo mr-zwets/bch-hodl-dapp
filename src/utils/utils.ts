@@ -25,6 +25,17 @@ export function parseOpreturn(opreturnData: string) {
   return locktime;
 }
 
+export function formatTimestamp(unixTimestamp: string){
+  const date = new Date(Number(unixTimestamp) * 1000);
+  const year = date.getUTCFullYear();
+  const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+  const day = String(date.getUTCDate()).padStart(2, '0');
+
+  return `${year}-${month}-${day}`;
+}
+
+export const satsToBchAmount = (sats: number) => sats / 100_000_000;
+
 export interface OnChainDataHodlContract {
   txid: string;
   opReturn: string;
