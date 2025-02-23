@@ -1,17 +1,19 @@
 import { ChaingraphClient, graphql } from "chaingraph-ts"
 import type { OnChainDataHodlContract } from "./utils";
-import { chaingraphUrl } from "@/config";
+import { chaingraphUrl, network } from "@/config";
 
 const chaingraphClient = new ChaingraphClient(chaingraphUrl)
 
 export async function fetchHodlContracts(){
-  const queryReqHodlContracts = graphql(`query {
+  const queryReqHodlContracts = graphql(`query hodlContracts(
+    $network: String
+  ){
     search_output_prefix(
       args: { locking_bytecode_prefix_hex: "6a04686f646c" }
       where: {
         transaction: {
           block_inclusions: {
-            block: { accepted_by: { node: { name: { _regex: "mainnet" } } } }
+            block: { accepted_by: { node: { name: { _regex: $network } } } }
           }
         }
       }
@@ -31,7 +33,7 @@ export async function fetchHodlContracts(){
   }`);
   
   // TODO: add timeout to requests
-  const resultQueryHodlContracts = await chaingraphClient.query(queryReqHodlContracts, {})
+  const resultQueryHodlContracts = await chaingraphClient.query(queryReqHodlContracts, {network})
   
   if (!resultQueryHodlContracts.data) {
     throw new Error("No data returned from Chaingraph query");

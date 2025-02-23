@@ -23,14 +23,22 @@ export const useStore = defineStore('store', () => {
   const bchBalance = computed(() => userUtxos.value?.reduce((acc, utxo) => acc + utxo.satoshis, 0n))
 
   // Hodl Contracts
-  const fetchAllHodlContractsStatus = ref(null as Promise<void> | null)
   const allHodlContracts = ref(undefined as undefined | OnChainDataHodlContract[])
+  const currentBlockHeight = ref(undefined as undefined | number)
+
+  // Util
+  const fetchStatus = ref({
+    allHodlContracts: null as Promise<void> | null,
+    currentBlockHeight: null as Promise<void> | null
+  })
+
 
   const provider = new ElectrumNetworkProvider('mainnet')
 
   initializeWalletConnect()
 
-  fetchAllHodlContractsStatus.value = scanHodlContracts()
+  fetchStatus.value.allHodlContracts = scanHodlContracts()
+  fetchStatus.value.currentBlockHeight = getCurrentBlockHeight()
 
   function waitForConnection(): Promise<void> {
     if (walletConnected.value) return Promise.resolve()
@@ -105,13 +113,18 @@ export const useStore = defineStore('store', () => {
     allHodlContracts.value = chaingraphResult
   }
 
+  async function getCurrentBlockHeight() {
+    currentBlockHeight.value = await provider.getBlockHeight()
+  }
+
   return {
     signingClient,
     session,
     walletConnectModal,
     provider,
     userAddress,
-    fetchAllHodlContractsStatus,
+    currentBlockHeight,
+    fetchStatus,
     allHodlContracts,
     walletConnected,
     userUtxos,

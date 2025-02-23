@@ -1,16 +1,24 @@
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue';
+import { onMounted, ref } from 'vue';
 import { Contract } from 'cashscript';
 import { binToHex, decodeCashAddress, hexToBin, lockingBytecodeToCashAddress } from '@bitauth/libauth';
-import { constructArtifactWithParams, parseOpreturn, satsToBchAmount } from '../utils/utils';
+import { constructArtifactWithParams, formatTimestamp, parseOpreturn, satsToBchAmount } from '../utils/utils';
 import { useStore } from '../store/store';
 const store = useStore();
-const userHodlContracts = ref(undefined as Contract[] | undefined);
+
+interface HodlContract extends ReturnType<typeof compileHodlContract>{
+  locktime: string;
+}
+
+const userHodlContracts = ref(undefined as HodlContract[] | undefined);
 const userContractBalances = ref(undefined as bigint[] | undefined);
 
 onMounted(async () => {
   await store.waitForConnection()
-  await store.fetchAllHodlContractsStatus
+  await Promise.all([
+    store.fetchStatus.allHodlContracts,
+    store.fetchStatus.currentBlockHeight
+  ])
   if(!store.userAddress) return
   const userPkh = decodeCashAddress(store.userAddress)
   if(typeof userPkh == 'string') return
@@ -29,7 +37,7 @@ async function getUserHodlContracts(userPkh: string) {
   for (const chaingraphItem of store.allHodlContracts) {
     const opreturnData = chaingraphItem.opReturn
     const locktime = parseOpreturn(opreturnData)
-    const newHodlContract = compileHodlContract(locktime, userPkh)
+    const newHodlContract = compileHodlContract(locktime, userPkh) as HodlContract
     const contractOutput = chaingraphItem.outputs.find(output => output.locking_bytecode.startsWith('a9'))
     const hodlContractLockingBytecode = contractOutput!.locking_bytecode
     const hodlContractAddress = lockingBytecodeToCashAddress(
@@ -38,6 +46,7 @@ async function getUserHodlContracts(userPkh: string) {
     // should not happen
     if(typeof hodlContractAddress == 'string') continue
     if(newHodlContract.address == hodlContractAddress.address){
+    newHodlContract.locktime = locktime
       listUserHodlContracts.push(newHodlContract)
     }
   }
@@ -48,10 +57,8 @@ async function getUserHodlContracts(userPkh: string) {
 async function getUserContractBalances(){
   if (userHodlContracts.value == undefined) return
   const balances = await Promise.all(userHodlContracts.value.map(contract => contract.getBalance()))
-  console.log(balances)
   userContractBalances.value = balances
 }
-
 </script>
 
 <template>
@@ -66,13 +73,16 @@ async function getUserContractBalances(){
       </div>
       <div v-else-if="userHodlContracts?.length">
         Found {{ userHodlContracts?.length }} hodl {{ userHodlContracts?.length > 1 ? 'contracts' : 'contract' }} <br/>
-          <div v-for="(userHodlContract, index) in userHodlContracts" :key="userHodlContract.address">
+          <div v-for="(userHodlContract, index) in userHodlContracts" :key="userHodlContract.address" style="margin: 5px 0;">
             contract address: {{ userHodlContract?.address }} <br/>
-            <span v-if="userContractBalances">
-              contract balance: {{ satsToBchAmount(Number(userContractBalances[index])) }}
+            contract balance: <span v-if="userContractBalances">
+               {{ satsToBchAmount(Number(userContractBalances[index])) }}
             </span>
-            <span v-else>loading...</span>
-            
+            <span v-else>loading...</span><br/>
+            contract locktime: {{ formatTimestamp(userHodlContract?.locktime) }} <br/>
+            status: <span v-if="userContractBalances && Number(userContractBalances[index]) == 0">
+              funds spent
+            </span>
           </div> 
       </div>
       <div v-else>

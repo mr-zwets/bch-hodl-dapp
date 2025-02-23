@@ -1,6 +1,6 @@
 import type { Artifact } from 'cashscript';
 import hodlArtifact from '../artifact.json' with { type: 'json' };
-import { bigIntToVmNumber, binToHex, binToUtf8, hexToBin } from '@bitauth/libauth'
+import { bigIntToVmNumber, binToHex, binToUtf8, decodeCashAddress, hexToBin } from '@bitauth/libauth'
 
 // The hodlArtifact contains a template variables for <locktime> and <pubkeyhash>
 // which we need to replace with the actual values for those params
@@ -25,13 +25,23 @@ export function parseOpreturn(opreturnData: string) {
   return locktime;
 }
 
-export function formatTimestamp(unixTimestamp: string){
-  const date = new Date(Number(unixTimestamp) * 1000);
-  const year = date.getUTCFullYear();
-  const month = String(date.getUTCMonth() + 1).padStart(2, '0');
-  const day = String(date.getUTCDate()).padStart(2, '0');
+export function convertAddressToPkh(userAddress: string){
+  const decodeAddressObj = decodeCashAddress(userAddress)
+  if(typeof decodeAddressObj == 'string') throw("error decodeCashAddress()")
+  const userPkh = decodeAddressObj.payload
+  const userPkhHex = binToHex(userPkh)
+  return userPkhHex
+}
 
-  return `${year}-${month}-${day}`;
+export function formatTimestamp(unixTimestamp: string){
+  if(Number(unixTimestamp) > 500_000_000){
+    const date = new Date(Number(unixTimestamp) * 1000);
+    const year = date.getUTCFullYear();
+    const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+    const day = String(date.getUTCDate()).padStart(2, '0');
+
+    return `${year}-${month}-${day}`;
+  } else return `blockheight ${unixTimestamp}`
 }
 
 export const satsToBchAmount = (sats: number) => sats / 100_000_000;
