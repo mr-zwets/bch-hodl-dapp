@@ -2,6 +2,7 @@
 import { formatTimestamp, parseOpreturn, satsToBchAmount } from '@/utils/utils';
 import { useStore } from '../store/store';
 import { computed, ref, watch } from 'vue';
+import { network } from '@/config';
 const store = useStore()
 
 interface DisplayContracts {
@@ -55,27 +56,32 @@ watch(() => store.allHodlContracts, () => {
     Loading...
   </div>
   <div v-if="store.allHodlContracts != undefined && tvlContracts != undefined">
+    <div v-if="network == 'chipnet'" style="margin-bottom: 10px;">Currently connected to Chipnet for testing...</div>
     <div>Active HODL contracts: {{ activeContracts?.length }}</div>
     <div>Current TVL HODL contracts: 
-      <span v-if="tvlActiveContracts">{{ satsToBchAmount(tvlActiveContracts).toFixed(0) + ' BCH' }} </span>
+      <span v-if="tvlActiveContracts">
+        {{ satsToBchAmount(tvlActiveContracts).toFixed(0)}} {{ network == "mainnet" ? "BCH" : "tBCH"  }}
+      </span>
     </div>
     <br/>
     <div>Total HODL contract created: {{ store.allHodlContracts.length }}</div>
-    <div>Total TVL HODL contracts: {{ satsToBchAmount(tvlContracts).toFixed(0) + ' BCH' }} </div>
+    <div>Total TVL HODL contracts:
+      {{ satsToBchAmount(tvlContracts).toFixed(0) }} {{ network == "mainnet" ? "BCH" : "tBCH"  }}
+    </div>
 
     <div v-if="displayContracts" style="margin-top: 20px;">
       <h3 style="margin: 4px 0px;">Biggest Value</h3>
       <div style="display: flex; gap: 50px; margin-bottom: 20px;">
         <div v-for="largestContract in displayContracts.biggestValue" :key="largestContract.satoshis">
           <div>Time Lock: {{ formatTimestamp(largestContract.timelock) }}</div>
-          <div>Value: {{ satsToBchAmount(largestContract.satoshis) + ' BCH' }}</div>
+          <div>Value: {{ satsToBchAmount(largestContract.satoshis) }} {{ network == "mainnet" ? "BCH" : "tBCH"  }}</div>
         </div>
       </div>
       <h3 style="margin: 4px 0px;">Longest Time Lock</h3>
       <div style="display: flex; gap: 50px;">
         <div v-for="longestTimeLock in displayContracts.longestTimeLocks" :key="longestTimeLock.timelock">
           <div>Time Lock: {{ formatTimestamp(longestTimeLock.timelock) }}</div>
-          <div>Value: {{ satsToBchAmount(longestTimeLock.satoshis) + ' BCH' }}</div>
+          <div>Value: {{ satsToBchAmount(longestTimeLock.satoshis) }} {{ network == "mainnet" ? "BCH" : "tBCH"  }}</div>
         </div>
       </div>
     </div>
