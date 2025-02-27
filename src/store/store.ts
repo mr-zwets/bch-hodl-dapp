@@ -8,8 +8,6 @@ import { wcModalConfig, projectId, wcMetadata, connectedChain, network } from "@
 import { ElectrumNetworkProvider, type Utxo } from 'cashscript';
 import type { signedTxObject } from '@/utils/wcUtils';
 import { stringify } from '@bitauth/libauth';
-// @ts-ignore
-import { ElectrumCluster, ElectrumTransport } from "electrum-cash"
 
 export const useStore = defineStore('store', () => {
   // Create WC modal
@@ -36,13 +34,8 @@ export const useStore = defineStore('store', () => {
     currentBlockHeight: null as Promise<void> | null
   })
 
-
-  // Explicitly create a custom 1-of-1 electrum cluster for chipnet
-  const electrumClusterChipnet = new ElectrumCluster('CashScript Application', '1.4.1', 1, 1);
-  // add server to cluster with autoconnect=false
-  electrumClusterChipnet.addServer('chipnet.bch.ninja',ElectrumTransport.WSS.Port, ElectrumTransport.WSS.Scheme, false);
-  // Initialise cashscript ElectrumNetworkProvider
-  const provider = new ElectrumNetworkProvider(network, network == "chipnet" ? electrumClusterChipnet : undefined);
+  // Initialise CashScript ElectrumNetworkProvider
+  const provider = new ElectrumNetworkProvider(network);
 
   initializeWalletConnect()
 

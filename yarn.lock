@@ -45,12 +45,17 @@
   resolved "https://registry.yarnpkg.com/@bitauth/libauth/-/libauth-3.0.0.tgz#d88535fc5353d5ecd11db96d9a229e11c06a43d2"
   integrity sha512-3yoL31XpnhAnf5nDVMFk4xPqebxDwXrgYAwpa31ARJnV5A/eXWlpNYvCd6FTZPFM4VvKfjCBi+jRCrw1hOZ0Jg==
 
-"@cashscript/utils@^0.10.5":
-  version "0.10.5"
-  resolved "https://registry.yarnpkg.com/@cashscript/utils/-/utils-0.10.5.tgz#b95d97cb70421a3be7d0ee978a0b2b6b3694300d"
-  integrity sha512-5AJxZBIxyMArFYb/FUeMmkmij1AfSPdfBee8w3uRECiuRd7twhw8O+xf3iqIDBo1KYAPmpJtyNyGGMybr2dDEw==
+"@bitauth/libauth@^3.1.0-next.2":
+  version "3.1.0-next.4"
+  resolved "https://registry.yarnpkg.com/@bitauth/libauth/-/libauth-3.1.0-next.4.tgz#141e5a448149075501a66dc9478911e1e8a33295"
+  integrity sha512-cvEluzkW27adgldtQxrxRnWfyqEizp2/PYhWAcoC7qtdhuhbBFzGUiHqog/egQVXi4tUVxpp+bsF1O7JdXW+Ow==
+
+"@cashscript/utils@^0.11.0-next.1":
+  version "0.11.0-next.1"
+  resolved "https://registry.yarnpkg.com/@cashscript/utils/-/utils-0.11.0-next.1.tgz#46b00b9527f7060935ad21110985f976fe552cd1"
+  integrity sha512-+kVXnmJ0dA/JqVnAo4URgsGE6bOkyxepgRcZWvhOoCUYGtwRc02ltL0sHBEv1ysTaiFYhNHhGkrFUNvMec/1xw==
   dependencies:
-    "@bitauth/libauth" "^3.0.0"
+    "@bitauth/libauth" "^3.1.0-next.2"
 
 "@esbuild/aix-ppc64@0.24.2":
   version "0.24.2"
@@ -1000,18 +1005,20 @@ camelcase@^5.0.0:
   resolved "https://registry.yarnpkg.com/camelcase/-/camelcase-5.3.1.tgz#e3c9b31569e106811df242f715725a1f4c494320"
   integrity sha512-L28STB170nwWS63UjtlEOE3dldQApaJXZkOI1uMFfzf3rRuPegHaHesyee+YxQ+W6SvRDQV6UrdOdRiR153wJg==
 
-cashscript@^0.10.5:
-  version "0.10.5"
-  resolved "https://registry.yarnpkg.com/cashscript/-/cashscript-0.10.5.tgz#da7be7824c56a3fa3afdf98a473f7587b8ecab1d"
-  integrity sha512-YG0OkUGzMHTlqqJ559YIzpbDtMDjH+uExNT2MmKqa3zPfmu7/VbxwdBOLRFnlDaHh3bOMFUlke0XpnGzm30Q9Q==
+cashscript@^0.11.0-next.1:
+  version "0.11.0-next.1"
+  resolved "https://registry.yarnpkg.com/cashscript/-/cashscript-0.11.0-next.1.tgz#0ae6592bd7bb63ead30eff5c4ff8200299fdf6aa"
+  integrity sha512-IqmxjcXefAvYbYa2kPCQcS7A4tlWNfDEEctfuVoJ8tZW2qDYaVGwgvdbwVddw1FeK7rZ+AFT7r2zCyHzM/XnWQ==
   dependencies:
-    "@bitauth/libauth" "^3.0.0"
-    "@cashscript/utils" "^0.10.5"
+    "@bitauth/libauth" "^3.1.0-next.2"
+    "@cashscript/utils" "^0.11.0-next.1"
     "@mr-zwets/bchn-api-wrapper" "^1.0.1"
-    delay "^5.0.0"
+    change-case "^5.4.4"
+    delay "^6.0.0"
     electrum-cash "^2.0.10"
     fast-deep-equal "^3.1.3"
     pako "^2.1.0"
+    semver "^7.6.3"
 
 chaingraph-ts@^0.2.3:
   version "0.2.3"
@@ -1023,6 +1030,11 @@ chaingraph-ts@^0.2.3:
     gql.tada "^1.8.10"
     graphql-ws "^5.16.0"
     ws "^8.18.0"
+
+change-case@^5.4.4:
+  version "5.4.4"
+  resolved "https://registry.yarnpkg.com/change-case/-/change-case-5.4.4.tgz#0d52b507d8fb8f204343432381d1a6d7bff97a02"
+  integrity sha512-HRQyTk2/YPEkt9TnUPbOpr64Uw3KOicFWPVBb+xiHvd6eBx/qPr9xqfBFDT8P2vWsvvz4jbEkfDe71W3VyNu2w==
 
 chokidar@^4.0.3:
   version "4.0.3"
@@ -1112,10 +1124,10 @@ defu@^6.1.4:
   resolved "https://registry.yarnpkg.com/defu/-/defu-6.1.4.tgz#4e0c9cf9ff68fe5f3d7f2765cc1a012dfdcb0479"
   integrity sha512-mEQCMmwJu317oSz8CwdIOdwf3xMif1ttiM8LTufzc3g6kR+9Pe236twL8j3IYT1F7GfRgGcW6MWxzZjLIkuHIg==
 
-delay@^5.0.0:
-  version "5.0.0"
-  resolved "https://registry.yarnpkg.com/delay/-/delay-5.0.0.tgz#137045ef1b96e5071060dd5be60bf9334436bd1d"
-  integrity sha512-ReEBKkIfe4ya47wlPYf/gu5ib6yUG0/Aez0JQZQz94kiWtRQvZIQbTiehsnwHvLSWJnQdhVeqYue7Id1dKr0qw==
+delay@^6.0.0:
+  version "6.0.0"
+  resolved "https://registry.yarnpkg.com/delay/-/delay-6.0.0.tgz#43749aefdf6cabd9e17b0d00bd3904525137e607"
+  integrity sha512-2NJozoOHQ4NuZuVIr5CWd0iiLVIRSDepakaovIN+9eIDHEhdCAEvSy2cuf1DCrPPQLvHmbqTHODlhHg8UCy4zw==
 
 destr@^2.0.3:
   version "2.0.3"
@@ -1789,6 +1801,11 @@ safe-stable-stringify@^2.1.0:
   version "2.5.0"
   resolved "https://registry.yarnpkg.com/safe-stable-stringify/-/safe-stable-stringify-2.5.0.tgz#4ca2f8e385f2831c432a719b108a3bf7af42a1dd"
   integrity sha512-b3rppTKm9T+PsVCBEOUR46GWI7fdOs00VKZ1+9c1EWDaDMvjQc6tUwuFyIprgGgTcWoVHSKrU8H31ZHA2e0RHA==
+
+semver@^7.6.3:
+  version "7.7.1"
+  resolved "https://registry.yarnpkg.com/semver/-/semver-7.7.1.tgz#abd5098d82b18c6c81f6074ff2647fd3e7220c9f"
+  integrity sha512-hlq8tAfn0m/61p4BVRcPzIGr6LKiMwo4VM6dGi6pt4qcRkmNzTcWq6eCEjEh+qXjkMDvPlOFFSGwQjoEa6gyMA==
 
 set-blocking@^2.0.0:
   version "2.0.0"

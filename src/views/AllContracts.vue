@@ -56,7 +56,7 @@ watch(() => store.allHodlContracts, () => {
     Loading...
   </div>
   <div v-if="store.allHodlContracts != undefined && tvlContracts != undefined">
-    <div v-if="network == 'chipnet'" style="margin-bottom: 10px;">Currently connected to Chipnet for testing...</div>
+    <div v-if="network == 'chipnet'" style="margin-bottom: 10px;">Currently connected to Chipnet for testing</div>
     <div>Active HODL contracts: {{ activeContracts?.length }}</div>
     <div>Current TVL HODL contracts: 
       <span v-if="tvlActiveContracts">
