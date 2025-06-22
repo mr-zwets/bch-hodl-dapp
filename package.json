@@ -14,20 +14,20 @@
     "@bitauth/libauth": "^3.0.0",
     "@walletconnect/modal": "^2.7.0",
     "@walletconnect/sign-client": "^2.18.1",
-    "cashscript": "^0.11.0-next.2",
+    "cashscript": "^0.11.0",
     "chaingraph-ts": "^0.2.3",
-    "pinia": "^3.0.1",
-    "vue": "^3.5.13",
-    "vue-router": "^4.5.0"
+    "pinia": "^3.0.3",
+    "vue": "^3.5.17",
+    "vue-router": "^4.5.1"
   },
   "devDependencies": {
     "@tsconfig/node22": "^22.0.0",
     "@types/node": "^22.13.4",
-    "@vitejs/plugin-vue": "^5.2.1",
+    "@vitejs/plugin-vue": "^5.2.4",
     "@vue/tsconfig": "^0.7.0",
     "npm-run-all2": "^7.0.2",
-    "typescript": "~5.7.3",
-    "vite": "^6.1.0",
-    "vue-tsc": "^2.2.2"
+    "typescript": "^5.8.3",
+    "vite": "^6.3.5",
+    "vue-tsc": "^2.2.10"
   }
 }
