@@ -1,12 +1,10 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
-import { Contract, type Output, TransactionBuilder  } from 'cashscript';
-import { binToHex, decodeCashAddress, decodeTransaction, hexToBin, lockingBytecodeToCashAddress} from '@bitauth/libauth';
+import { Contract, type Output, placeholderPublicKey, placeholderSignature, TransactionBuilder  } from 'cashscript';
+import { binToHex, decodeCashAddress, hexToBin, lockingBytecodeToCashAddress} from '@bitauth/libauth';
 import { constructArtifactWithParams, convertAddressToPkh, formatTimestamp, getBalance, parseOpreturn, satsToBchAmount } from '../utils/utils';
 import { useStore } from '../store/store';
 import { network } from '@/config';
-import { createWcContractObj, generateSourceOutputs, type signedTxObject } from '@/utils/wcUtils';
-import type { wcSourceOutputs } from '@/interfaces/interfaces';
 const store = useStore();
 
 interface HodlContract extends ReturnType<typeof compileHodlContract>{
@@ -77,8 +75,8 @@ async function unlockHodlVault(locktime: number){
   const reclaimAmount = contractBalance - 500n - BigInt(100 * contractUtxos.length)
   const reclaimOutput: Output = { to: store.userAddress, amount: reclaimAmount }
 
-  const placeholderSig = Uint8Array.from(Array(65))
-  const placeholderPubKey = Uint8Array.from(Array(33));
+  const placeholderSig = placeholderSignature()
+  const placeholderPubKey = placeholderPublicKey();
 
   const transactionBuilder = new TransactionBuilder({provider: store.provider})
 
@@ -86,26 +84,12 @@ async function unlockHodlVault(locktime: number){
   transactionBuilder.addInputs(contractUtxos, hodlContract.unlock.spend(placeholderPubKey, placeholderSig))
   transactionBuilder.addOutput(reclaimOutput)
 
-  const unsignedRawTransactionHex = transactionBuilder.build();
-
-  const decodedTransaction = decodeTransaction(hexToBin(unsignedRawTransactionHex));
-  if(typeof decodedTransaction == "string") throw new Error("!decodedTransaction")
-
-  const sourceOutputs = generateSourceOutputs(transactionBuilder.inputs)
-
-  const wcSourceOutputs: wcSourceOutputs = sourceOutputs.map((sourceOutput, index) => {
-    const contractInfoWc = createWcContractObj(hodlContract, index)
-    return { ...sourceOutput, ...contractInfoWc, ...decodedTransaction.inputs[index] }
-  })
-
-  const wcTransactionObj = {
-    transaction: decodedTransaction,
-    sourceOutputs: wcSourceOutputs,
+  const wcTransactionObj = transactionBuilder.generateWcTransactionObject({
     broadcast: true,
     userPrompt: "Reclaim HODL Value",
-  };
+  })
 
-  const signResult = await store.signTransaction(wcTransactionObj) as (signedTxObject | undefined);
+  const signResult = await store.signTransaction(wcTransactionObj);
   console.log(signResult);
   if (!signResult) return 
 

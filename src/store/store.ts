@@ -5,7 +5,7 @@ import { WalletConnectModal } from '@walletconnect/modal';
 import { fetchHodlContracts } from '@/utils/chaingraph'
 import type { OnChainDataHodlContract } from '../interfaces/interfaces'
 import { wcModalConfig, projectId, wcMetadata, connectedChain, network } from "@/config";
-import { ElectrumNetworkProvider, type Utxo } from 'cashscript';
+import { ElectrumNetworkProvider, type Utxo, type WcTransactionObject } from 'cashscript';
 import type { signedTxObject } from '@/utils/wcUtils';
 import { stringify } from '@bitauth/libauth';
 
@@ -100,7 +100,7 @@ export const useStore = defineStore('store', () => {
     signingClient.value = signClient
   }
 
-  async function signTransaction(wcTransactionObj: any): Promise<signedTxObject | undefined> {
+  async function signTransaction(wcTransactionObj: WcTransactionObject): Promise<signedTxObject | undefined> {
     console.log('signTransaction')
     try {
       const result = await signingClient.value?.request({
