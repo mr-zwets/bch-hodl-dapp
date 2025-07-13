@@ -75,10 +75,10 @@
   resolved "https://registry.yarnpkg.com/@bitauth/libauth/-/libauth-3.1.0-next.4.tgz#141e5a448149075501a66dc9478911e1e8a33295"
   integrity sha512-cvEluzkW27adgldtQxrxRnWfyqEizp2/PYhWAcoC7qtdhuhbBFzGUiHqog/egQVXi4tUVxpp+bsF1O7JdXW+Ow==
 
-"@cashscript/utils@^0.11.0":
-  version "0.11.0"
-  resolved "https://registry.yarnpkg.com/@cashscript/utils/-/utils-0.11.0.tgz#6c767afdb9f1c439dfc850f77870f93a3b9d00c7"
-  integrity sha512-kx1LS7xnczU7g2gAf2mDmybUXTIE59okRGknmVEyb3vkND2r/cPdhWRBzFl1woyYVJ1ce7WeggUfoy1NGgOW2A==
+"@cashscript/utils@^0.11.2":
+  version "0.11.2"
+  resolved "https://registry.yarnpkg.com/@cashscript/utils/-/utils-0.11.2.tgz#4b701db09efeaee8a46e2e9905a443e5dd4e3f8e"
+  integrity sha512-/H5Fvg8L6sRCs1v1XwyA1rYqgZXlojmK1Qr7Co5Wn3WDPv+Z6oKkvi9m283dOAO7U0D8HILJW1yF3fr1n4BsEw==
   dependencies:
     "@bitauth/libauth" "^3.1.0-next.2"
 
@@ -1096,13 +1096,13 @@ camelcase@^5.0.0:
   resolved "https://registry.yarnpkg.com/camelcase/-/camelcase-5.3.1.tgz#e3c9b31569e106811df242f715725a1f4c494320"
   integrity sha512-L28STB170nwWS63UjtlEOE3dldQApaJXZkOI1uMFfzf3rRuPegHaHesyee+YxQ+W6SvRDQV6UrdOdRiR153wJg==
 
-cashscript@^0.11.0:
-  version "0.11.0"
-  resolved "https://registry.yarnpkg.com/cashscript/-/cashscript-0.11.0.tgz#53fccbb4c0a86fb86516776ef1570e47ca7568c5"
-  integrity sha512-XbUtAr99Id6JPEJq7y1UpTp/21GhIL8q/8VzocvdjNDTz5ghcfgrzLZLLIdXtd6WEAnOk0o0Dq2tos+ewh+sGQ==
+cashscript@^0.11.2:
+  version "0.11.2"
+  resolved "https://registry.yarnpkg.com/cashscript/-/cashscript-0.11.2.tgz#69949158d76d8ee4156f14d10bdca0c54d30f9ca"
+  integrity sha512-Ab+V8+PyktENKWXK4vRcf/wdmiEHSAg1wNJrilRFB2DYuJDfSyL3ZcstzfQZEg0+0P2ZmCT0RE4jUAjia2rAQw==
   dependencies:
     "@bitauth/libauth" "^3.1.0-next.2"
-    "@cashscript/utils" "^0.11.0"
+    "@cashscript/utils" "^0.11.2"
     "@electrum-cash/network" "^4.1.1"
     "@mr-zwets/bchn-api-wrapper" "^1.0.1"
     delay "^6.0.0"

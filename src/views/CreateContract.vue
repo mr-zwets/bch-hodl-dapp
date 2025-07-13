@@ -2,9 +2,7 @@
 import { ref } from 'vue';
 import { useStore } from '../store/store';
 import { constructArtifactWithParams, convertAddressToPkh, convertPkhToLockingBytecode, getBalance } from '@/utils/utils';
-import { Contract, TransactionBuilder, type Output, type Unlocker } from 'cashscript';
-import { decodeTransaction, hexToBin } from '@bitauth/libauth';
-import { generateSourceOutputs, type signedTxObject } from '@/utils/wcUtils';
+import { Contract, placeholderP2PKHUnlocker, TransactionBuilder, type Output, type Unlocker } from 'cashscript';
 import { network } from '@/config';
 const store = useStore()
 
@@ -49,36 +47,20 @@ async function proposeWcTransaction(){
   const changeAmount =  userInputTotal - requiredAmountSats
   const changeOutput: Output = { to: store.userAddress, amount: changeAmount }
 
-  const placeholderUnlocker: Unlocker = {
-    generateLockingBytecode: () => convertPkhToLockingBytecode(userPkh),
-    generateUnlockingBytecode: () => Uint8Array.from(Array(0))
-  }
+  const placeholderUnlocker = placeholderP2PKHUnlocker(store.userAddress)
 
   const transactionBuilder = new TransactionBuilder({provider: store.provider})
   transactionBuilder.addInputs(userInputUtxos, placeholderUnlocker)
   transactionBuilder.addOpReturnOutput(opreturnData)
   transactionBuilder.addOutput(contractOutput)
   if(changeAmount > 550n) transactionBuilder.addOutput(changeOutput)
-  
-  const unsignedRawTransactionHex = transactionBuilder.build();
 
-  const decodedTransaction = decodeTransaction(hexToBin(unsignedRawTransactionHex));
-  if(typeof decodedTransaction == "string") throw new Error("!decodedTransaction")
-
-  const sourceOutputs = generateSourceOutputs(transactionBuilder.inputs)
-
-  const wcSourceOutputs = sourceOutputs.map((sourceOutput, index) => {
-    return { ...sourceOutput, ...decodedTransaction.inputs[index] }
-  })
-
-  const wcTransactionObj = {
-    transaction: decodedTransaction,
-    sourceOutputs: wcSourceOutputs,
+  const wcTransactionObj = transactionBuilder.generateWcTransactionObject({
     broadcast: true,
     userPrompt: "Create HODL Contract",
-  };
+  })
 
-  const signResult = await store.signTransaction(wcTransactionObj) as (signedTxObject | undefined);
+  const signResult = await store.signTransaction(wcTransactionObj);
   console.log(signResult);
   if (!signResult) return 
   

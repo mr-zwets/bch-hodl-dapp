@@ -14,7 +14,7 @@
     "@bitauth/libauth": "^3.0.0",
     "@walletconnect/modal": "^2.7.0",
     "@walletconnect/sign-client": "^2.18.1",
-    "cashscript": "^0.11.0",
+    "cashscript": "^0.11.2",
     "chaingraph-ts": "^0.2.3",
     "pinia": "^3.0.3",
     "vue": "^3.5.17",
