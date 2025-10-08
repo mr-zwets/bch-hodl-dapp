@@ -81,6 +81,10 @@ async function unlockHodlVault(locktime: number){
   const transactionBuilder = new TransactionBuilder({provider: store.provider})
 
   transactionBuilder.setLocktime(store.currentBlockHeight)
+  // needed for typescript
+  if (!hodlContract.unlock?.spend) {
+    throw new Error("hodlContract.unlock.spend is undefined");
+  }
   transactionBuilder.addInputs(contractUtxos, hodlContract.unlock.spend(placeholderPubKey, placeholderSig))
   transactionBuilder.addOutput(reclaimOutput)
 

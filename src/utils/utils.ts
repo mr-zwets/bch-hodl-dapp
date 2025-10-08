@@ -15,6 +15,7 @@ export function constructArtifactWithParams(pkhHex:string, locktime:bigint){
 
 export function parseOpreturn(opreturnData: string) {
   const truncatedOpreturn = opreturnData.split("04686f646c")[1];
+  if(!truncatedOpreturn) throw new Error("failed to parse opreturn data");
   const lengthAddressHex = truncatedOpreturn.slice(0, 2);
   const lengthAddress = parseInt(lengthAddressHex, 16);
   const truncatedOpreturn2 = truncatedOpreturn.slice(2 + lengthAddress * 2);
