@@ -53,7 +53,18 @@ export function formatTimestamp(unixTimestamp: string | number) {
     const day = String(date.getUTCDate()).padStart(2, '0');
 
     return `${year}-${month}-${day}`;
-  } else return `blockheight ${unixTimestamp}`
+  } else return `blockheight ${formatBlockHeight(unixTimestamp)}`
+}
+
+// Display block heights with thousands separators, like "886,662"
+export const formatBlockHeight = (blockHeight: number | string) => Number(blockHeight).toLocaleString('en-US');
+
+// Human readable duration for a number of blocks, assuming 10 minutes per block
+export function formatBlocksDuration(blocksRemaining: number){
+  const minutes = blocksRemaining * 10
+  if(minutes >= 2 * 24 * 60) return `~${Math.round(minutes / (24 * 60))} days`
+  if(minutes >= 2 * 60) return `~${Math.round(minutes / 60)} hours`
+  return `~${minutes} minutes`
 }
 
 export const satsToBchAmount = (sats: number) => sats / 100_000_000;

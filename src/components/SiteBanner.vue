@@ -18,10 +18,13 @@ function switchNetwork(event: Event){
 
 <template>
   <header style="margin-bottom: 25px">
-    <div style="display: flex; align-items: center;" class="topBar">
-      <RouterLink class="siteName" to="/">
-        <h1>BCH Hodl Dapp 💎</h1>
-      </RouterLink>
+    <div class="topBar">
+      <div>
+        <RouterLink class="siteName" to="/">
+          <h1>BCH Hodl Dapp 💎</h1>
+        </RouterLink>
+        <h3 class="tagline">A smart contract to timelock your Bitcoin Cash!</h3>
+      </div>
       <div class="navContainer">
         <nav style="display: flex; gap: 20px;">
           <RouterLink to="/">All Contracts</RouterLink>
@@ -39,18 +42,16 @@ function switchNetwork(event: Event){
           <span>
             <wcButton />
           </span>
-          <span style="margin-left: 20px; width: 220px;" v-if="store.userAddress">
-            Balance: <span v-if="store.bchBalance !== undefined">
-              <span>{{ satsToBchAmount(Number(store.bchBalance)) }} BCH </span>
-            </span><span v-else> loading...</span>
-          </span>
+        </div>
+        <div v-if="store.userAddress" style="margin-top: 5px;">
+          Balance: <span v-if="store.bchBalance !== undefined">{{ satsToBchAmount(Number(store.bchBalance)) }} BCH</span>
+          <span v-else>loading...</span>
         </div>
         <div class="address" v-if="store.userAddress">
-          {{ store.userAddress.slice(0,28) + "..." + store.userAddress.slice(-10)}}
+          {{ store.userAddress.slice(0,22) + "..." + store.userAddress.slice(-8)}}
         </div>
       </div>
     </div>
-    <h3>A smart contract to timelock your Bitcoin Cash!</h3>
   </header>
 </template>
 
@@ -63,34 +64,38 @@ a {
   margin-right: 15px;
   cursor: pointer;
 }
+.topBar {
+  display: flex;
+  align-items: flex-start;
+  gap: 60px;
+}
+.topBar nav a {
+  white-space: nowrap;
+}
+.tagline {
+  white-space: nowrap;
+}
 .navContainer{
-  margin-left: 150px;
+  margin-top: 12px;
 }
 .wcContainer{
-  margin-left: 150px;
-}
-@media only screen and (max-width: 1300px) {
-  .topBar {
-    justify-content: space-between;
-  }
-  .navContainer {
-    margin-left: 0px;
-  }
-  .wcContainer {
-    margin-left: 0px;
-  }
+  margin-top: 12px;
+  margin-left: auto;
 }
 @media only screen and (max-width: 1000px) {
   .topBar {
     flex-direction: column;
-    align-items: flex-start;
+    gap: 0px;
+  }
+  .tagline {
+    white-space: normal;
   }
   .navContainer {
-    margin-left: 0;
+    margin-top: 10px;
   }
   .wcContainer{
-    margin-left: 0px;
     margin: 10px 0;
+    margin-left: 0;
   }
 }
 </style>

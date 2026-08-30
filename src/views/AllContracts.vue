@@ -72,13 +72,13 @@ watch(() => store.allHodlContracts, () => {
     <div>Active HODL contracts: {{ activeContracts?.length }}</div>
     <div>Current TVL HODL contracts: 
       <span v-if="tvlActiveContracts != undefined">
-        {{ satsToBchAmount(tvlActiveContracts).toFixed(0)}} {{ network == "mainnet" ? "BCH" : "tBCH"  }}
+        {{ satsToBchAmount(tvlActiveContracts).toLocaleString('en-US', { maximumFractionDigits: 0 }) }} {{ network == "mainnet" ? "BCH" : "tBCH"  }}
       </span>
     </div>
     <br/>
     <div>Total HODL contract created: {{ verifiedContracts }}</div>
     <div>Total TVL HODL contracts:
-      {{ satsToBchAmount(tvlContracts).toFixed(0) }} {{ network == "mainnet" ? "BCH" : "tBCH"  }}
+      {{ satsToBchAmount(tvlContracts).toLocaleString('en-US', { maximumFractionDigits: 0 }) }} {{ network == "mainnet" ? "BCH" : "tBCH"  }}
     </div>
     <div v-if="unverifiedContracts" style="margin-top: 10px;">
       Excluded {{ unverifiedContracts }} {{ unverifiedContracts > 1 ? 'entries' : 'entry' }} which could not be verified on-chain

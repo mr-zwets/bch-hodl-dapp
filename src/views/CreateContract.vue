@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import { useStore } from '../store/store';
-import { constructArtifactWithParams, convertAddressToPkh, convertPkhToLockingBytecode, estimateBlockHeightTimestamp, formatTimestamp, getBalance } from '@/utils/utils';
+import { constructArtifactWithParams, convertAddressToPkh, convertPkhToLockingBytecode, estimateBlockHeightTimestamp, formatBlockHeight, formatBlocksDuration, formatTimestamp, getBalance } from '@/utils/utils';
 import { Contract, placeholderP2PKHUnlocker, TransactionBuilder, type Output, type Unlocker } from 'cashscript';
 import { network } from '@/config';
 const store = useStore()
@@ -10,11 +10,18 @@ const locktimeInput = ref('')
 const bchAmountInput = ref('')
 
 // Live estimate of the unlock date while the user types a block height
-const estimatedUnlockDate = computed(() => {
+const estimatedUnlock = computed(() => {
+  if(!locktimeInput.value || !store.currentBlockHeight) return undefined
   const locktime = Number(locktimeInput.value)
-  if(!Number.isInteger(locktime) || locktime >= 500_000_000) return undefined
-  if(!store.currentBlockHeight || locktime <= store.currentBlockHeight) return undefined
-  return formatTimestamp(estimateBlockHeightTimestamp(locktime, store.currentBlockHeight))
+  if(!Number.isInteger(locktime) || locktime <= 0 || locktime >= 500_000_000) return undefined
+  if(locktime <= store.currentBlockHeight) return { inPast: true }
+  const blocksRemaining = locktime - store.currentBlockHeight
+  return {
+    inPast: false,
+    date: formatTimestamp(estimateBlockHeightTimestamp(locktime, store.currentBlockHeight)),
+    duration: formatBlocksDuration(blocksRemaining),
+    blocksRemaining,
+  }
 })
 
 async function proposeWcTransaction(){
@@ -46,7 +53,7 @@ async function createHodlContract(){
   }
   if(store.currentBlockHeight && locktime <= store.currentBlockHeight){
     throw new Error(
-      `Locktime ${locktime} is not above the current block height (${store.currentBlockHeight}), so the funds would not be locked`
+      `Locktime ${formatBlockHeight(locktime)} is not above the current block height (${formatBlockHeight(store.currentBlockHeight)}), so the funds would not be locked`
     )
   }
 
@@ -54,7 +61,7 @@ async function createHodlContract(){
   const dateEstimate = store.currentBlockHeight ?
     formatTimestamp(estimateBlockHeightTimestamp(locktime, store.currentBlockHeight)) : 'unknown'
   const confirmed = confirm(
-    `You are locking ${bchAmount} BCH until block ${locktime} — approximately ${dateEstimate} (~10 min/block).\n\n` +
+    `You are locking ${bchAmount} BCH until block ${formatBlockHeight(locktime)}, approximately ${dateEstimate} (~10 min/block).\n\n` +
     `Until then these funds cannot be spent by anyone, including you.`
   )
   if(!confirmed) return
@@ -142,9 +149,16 @@ async function createHodlContract(){
   </div>
   <div v-if="store.walletConnected">
     <input v-model="bchAmountInput" placeholder="bchamount" /> {{ network == "mainnet" ? "BCH" : "tBCH"  }} <br/>
-    Current blockheight is {{ store.currentBlockHeight }} <br/>
-    Lock until blockheight <input v-model="locktimeInput" placeholder="locktime" />
-    <span v-if="estimatedUnlockDate"> ~unlocks {{ estimatedUnlockDate }} (est. 10 min/block)</span><br/>
+    Current blockheight is {{ store.currentBlockHeight ? formatBlockHeight(store.currentBlockHeight) : '...' }} <br/>
+    Lock until blockheight <input v-model="locktimeInput" placeholder="locktime" /><br/>
+    <div style="margin-top: 4px;">
+      <span v-if="!estimatedUnlock">Estimated unlock: ...</span>
+      <span v-else-if="estimatedUnlock.inPast">This blockheight has already passed, the funds would not be locked</span>
+      <span v-else>
+        Estimated unlock: {{ estimatedUnlock.date }}
+        (in {{ formatBlockHeight(estimatedUnlock.blocksRemaining!) }} blocks, {{ estimatedUnlock.duration }}, est. 10 min/block)
+      </span>
+    </div>
     <button @click="proposeWcTransaction" style="cursor: pointer; margin-top: 10px; padding: 4px 6px;">Create Contract</button>
   </div>
 </template>

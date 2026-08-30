@@ -2,7 +2,7 @@
 import { onMounted, ref, watch } from 'vue';
 import { Contract, type Output, placeholderPublicKey, placeholderSignature, TransactionBuilder  } from 'cashscript';
 import { hexToBin, lockingBytecodeToCashAddress} from '@bitauth/libauth';
-import { constructArtifactWithParams, convertAddressToPkh, estimateBlockHeightTimestamp, formatTimestamp, getBalance, parseOpreturn, satsToBchAmount } from '../utils/utils';
+import { constructArtifactWithParams, convertAddressToPkh, estimateBlockHeightTimestamp, formatBlockHeight, formatBlocksDuration, formatTimestamp, getBalance, parseOpreturn, satsToBchAmount } from '../utils/utils';
 import { useStore } from '../store/store';
 import { network } from '@/config';
 const store = useStore();
@@ -88,9 +88,8 @@ function lockedStatusText(locktime: number){
   if(locktime >= 500_000_000) return `locked until ${formatTimestamp(locktime)} (time-based lock)`
   if(!store.currentBlockHeight) return 'locked'
   const blocksRemaining = locktime - store.currentBlockHeight
-  const daysLeft = Math.ceil(blocksRemaining * 10 / (60 * 24))
   const dateEstimate = formatTimestamp(estimateBlockHeightTimestamp(locktime, store.currentBlockHeight))
-  return `locked until block ${locktime} (~${dateEstimate}, ~${daysLeft} ${daysLeft == 1 ? 'day' : 'days'} left)`
+  return `locked until block ${formatBlockHeight(locktime)} (~${dateEstimate}, ${formatBlocksDuration(blocksRemaining)} left)`
 }
 
 async function getUserContractBalances(){
