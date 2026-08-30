@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { formatTimestamp, parseOpreturn, satsToBchAmount } from '@/utils/utils';
+import { formatTimestamp, satsToBchAmount } from '@/utils/utils';
+import { verifyHodlContract } from '@/utils/verifyHodlContract';
 import { useStore } from '../store/store';
 import { computed, ref, watch } from 'vue';
 import { network } from '@/config';
@@ -19,6 +20,8 @@ interface ActiveHodlContract {
 const displayContracts = ref(undefined as DisplayContracts | undefined)
 const activeContracts = ref(undefined as ActiveHodlContract[] | undefined)
 const tvlContracts = ref(undefined as number | undefined)
+const unverifiedContracts = ref(0)
+const verifiedContracts = ref(0)
 const tvlActiveContracts = computed(() => {
   if(activeContracts.value == undefined) return
   return activeContracts.value.reduce((acc, curr) => acc + Number(curr.satoshis), 0)
@@ -28,12 +31,21 @@ function getDisplayContracts() {
   if(store.allHodlContracts == undefined) return
 
   const infoHodlContracts = []
+  let countUnverified = 0
   for(const hodlContract of store.allHodlContracts){
-    const opreturnData = hodlContract.opReturn
-    const locktime = parseOpreturn(opreturnData)
-    const contractOutput = hodlContract.outputs.find(output => output.locking_bytecode.startsWith('a9'))
-    infoHodlContracts.push({timelock: locktime, satoshis: contractOutput!.value_satoshis, isSpent: contractOutput!.spent})
+    const verifiedContract = verifyHodlContract(hodlContract)
+    if(!verifiedContract){
+      countUnverified += 1
+      continue
+    }
+    infoHodlContracts.push({
+      timelock: verifiedContract.locktime.toString(),
+      satoshis: verifiedContract.satoshis,
+      isSpent: verifiedContract.isSpent
+    })
   }
+  unverifiedContracts.value = countUnverified
+  verifiedContracts.value = infoHodlContracts.length
   tvlContracts.value = infoHodlContracts.reduce((acc, curr) => acc + Number(curr.satoshis), 0)
   activeContracts.value = infoHodlContracts.filter(contract => !contract.isSpent)
   const longestTimeLocks = [...infoHodlContracts].sort((a, b) => Number(b.timelock) - Number(a.timelock)).slice(0, 3)
@@ -64,9 +76,12 @@ watch(() => store.allHodlContracts, () => {
       </span>
     </div>
     <br/>
-    <div>Total HODL contract created: {{ store.allHodlContracts.length }}</div>
+    <div>Total HODL contract created: {{ verifiedContracts }}</div>
     <div>Total TVL HODL contracts:
       {{ satsToBchAmount(tvlContracts).toFixed(0) }} {{ network == "mainnet" ? "BCH" : "tBCH"  }}
+    </div>
+    <div v-if="unverifiedContracts" style="margin-top: 10px;">
+      Excluded {{ unverifiedContracts }} {{ unverifiedContracts > 1 ? 'entries' : 'entry' }} which could not be verified on-chain
     </div>
 
     <div v-if="displayContracts" style="margin-top: 20px;">

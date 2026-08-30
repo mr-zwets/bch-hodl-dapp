@@ -21,12 +21,16 @@ export async function fetchHodlContracts(){
       transaction_hash
       locking_bytecode
       transaction {
+        inputs {
+          unlocking_bytecode
+        }
         outputs {
           locking_bytecode
           value_satoshis
           spent_by {
             outpoint_transaction_hash
-        }
+            unlocking_bytecode
+          }
         }
       }
     }
@@ -41,10 +45,14 @@ export async function fetchHodlContracts(){
   const listContracts = resultQueryHodlContracts.data.search_output_prefix.map((output: any) => ({
     txid: output.transaction_hash.slice(2),
     opReturn: output.locking_bytecode.slice(2),
+    inputs: output.transaction.inputs.map((inputInfo: any) => ({
+      unlocking_bytecode: inputInfo.unlocking_bytecode.slice(2)
+    })),
     outputs: output.transaction.outputs.map((outputInfo: any) => ({
       locking_bytecode: outputInfo.locking_bytecode.slice(2),
       value_satoshis: outputInfo.value_satoshis,
-      spent: outputInfo.spent_by.length > 0
+      spent: outputInfo.spent_by.length > 0,
+      spending_unlocking_bytecode: outputInfo.spent_by[0]?.unlocking_bytecode?.slice(2)
     }))
   }));
   return listContracts as OnChainDataHodlContract[]
