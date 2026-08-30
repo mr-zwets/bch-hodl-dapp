@@ -45,7 +45,8 @@ export function convertPkhToLockingBytecode(userPkh: string){
 }
 
 export function formatTimestamp(unixTimestamp: string | number) {
-  if(Number(unixTimestamp) > 500_000_000){
+  // 500,000,000 is the BIP65 threshold separating block heights from timestamps
+  if(Number(unixTimestamp) >= 500_000_000){
     const date = new Date(Number(unixTimestamp) * 1000);
     const year = date.getUTCFullYear();
     const month = String(date.getUTCMonth() + 1).padStart(2, '0');
@@ -56,6 +57,13 @@ export function formatTimestamp(unixTimestamp: string | number) {
 }
 
 export const satsToBchAmount = (sats: number) => sats / 100_000_000;
+
+// Estimate the unix timestamp (in seconds) at which a future block height will be reached,
+// assuming an average of 10 minutes per block
+export function estimateBlockHeightTimestamp(targetHeight: number, currentHeight: number) {
+  const secondsPerBlock = 600
+  return Math.floor(Date.now() / 1000) + (targetHeight - currentHeight) * secondsPerBlock
+}
 
 export function getBalance(utxos: Utxo[]): bigint {
   return utxos.reduce((acc, utxo) => acc + utxo.satoshis, 0n);

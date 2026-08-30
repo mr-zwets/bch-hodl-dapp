@@ -26,7 +26,7 @@ const store = useStore()
           </span>
           <span style="margin-left: 20px; width: 220px;" v-if="store.userAddress">
             Balance: <span v-if="store.bchBalance !== undefined">
-              <span>{{ satsToBchAmount(Number(store.bchBalance)).toFixed(2) }} BCH </span>
+              <span>{{ satsToBchAmount(Number(store.bchBalance)) }} BCH </span>
             </span><span v-else> loading...</span>
           </span>
         </div>

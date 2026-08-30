@@ -1,13 +1,21 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { useStore } from '../store/store';
-import { constructArtifactWithParams, convertAddressToPkh, convertPkhToLockingBytecode, getBalance } from '@/utils/utils';
+import { constructArtifactWithParams, convertAddressToPkh, convertPkhToLockingBytecode, estimateBlockHeightTimestamp, formatTimestamp, getBalance } from '@/utils/utils';
 import { Contract, placeholderP2PKHUnlocker, TransactionBuilder, type Output, type Unlocker } from 'cashscript';
 import { network } from '@/config';
 const store = useStore()
 
 const locktimeInput = ref('')
 const bchAmountInput = ref('')
+
+// Live estimate of the unlock date while the user types a block height
+const estimatedUnlockDate = computed(() => {
+  const locktime = Number(locktimeInput.value)
+  if(!Number.isInteger(locktime) || locktime >= 500_000_000) return undefined
+  if(!store.currentBlockHeight || locktime <= store.currentBlockHeight) return undefined
+  return formatTimestamp(estimateBlockHeightTimestamp(locktime, store.currentBlockHeight))
+})
 
 async function proposeWcTransaction(){
   try {
@@ -39,6 +47,15 @@ async function createHodlContract(){
       `Locktime ${locktime} is not above the current block height (${store.currentBlockHeight}), so the funds would not be locked`
     )
   }
+
+  // Confirmation summary before proposing the transaction to the wallet
+  const dateEstimate = store.currentBlockHeight ?
+    formatTimestamp(estimateBlockHeightTimestamp(locktime, store.currentBlockHeight)) : 'unknown'
+  const confirmed = confirm(
+    `You are locking ${bchAmount} BCH until block ${locktime} — approximately ${dateEstimate} (~10 min/block).\n\n` +
+    `Until then these funds cannot be spent by anyone, including you.`
+  )
+  if(!confirmed) return
 
   const userPkh = convertAddressToPkh(store.userAddress)
   const hodlArtifactWithParams = constructArtifactWithParams(userPkh, BigInt(locktime));
@@ -94,7 +111,8 @@ async function createHodlContract(){
   console.log(signResult);
   if (!signResult) return 
   
-  const successMessage = `Succesfully create a HODL contract! txid: ${signResult.signedTransactionHash}`
+  const successMessage = `Successfully created a HODL contract! txid: ${signResult.signedTransactionHash}\n\n` +
+    `Your contract will appear under 'User Contracts' after the transaction confirms (~10 minutes).`
   alert(successMessage);
   console.log(successMessage);
 
@@ -113,7 +131,8 @@ async function createHodlContract(){
   <div v-if="store.walletConnected">
     <input v-model="bchAmountInput" placeholder="bchamount" /> {{ network == "mainnet" ? "BCH" : "tBCH"  }} <br/>
     Current blockheight is {{ store.currentBlockHeight }} <br/>
-    Lock until blockheight <input v-model="locktimeInput" placeholder="locktime" /><br/>
+    Lock until blockheight <input v-model="locktimeInput" placeholder="locktime" />
+    <span v-if="estimatedUnlockDate"> ~unlocks {{ estimatedUnlockDate }} (est. 10 min/block)</span><br/>
     <button @click="proposeWcTransaction" style="cursor: pointer; margin-top: 10px; padding: 4px 6px;">Create Contract</button>
   </div>
 </template>

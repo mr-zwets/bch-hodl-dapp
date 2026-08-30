@@ -71,7 +71,7 @@ watch(() => store.allHodlContracts, () => {
     <div v-if="network == 'chipnet'" style="margin-bottom: 10px;">Currently connected to Chipnet for testing</div>
     <div>Active HODL contracts: {{ activeContracts?.length }}</div>
     <div>Current TVL HODL contracts: 
-      <span v-if="tvlActiveContracts">
+      <span v-if="tvlActiveContracts != undefined">
         {{ satsToBchAmount(tvlActiveContracts).toFixed(0)}} {{ network == "mainnet" ? "BCH" : "tBCH"  }}
       </span>
     </div>

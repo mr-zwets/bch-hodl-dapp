@@ -2,7 +2,7 @@
 import { onMounted, ref } from 'vue';
 import { Contract, type Output, placeholderPublicKey, placeholderSignature, TransactionBuilder  } from 'cashscript';
 import { hexToBin, lockingBytecodeToCashAddress} from '@bitauth/libauth';
-import { constructArtifactWithParams, convertAddressToPkh, formatTimestamp, getBalance, parseOpreturn, satsToBchAmount } from '../utils/utils';
+import { constructArtifactWithParams, convertAddressToPkh, estimateBlockHeightTimestamp, formatTimestamp, getBalance, parseOpreturn, satsToBchAmount } from '../utils/utils';
 import { useStore } from '../store/store';
 import { network } from '@/config';
 const store = useStore();
@@ -56,6 +56,16 @@ async function getUserHodlContracts(userPkh: string) {
   }
   userHodlContracts.value = listUserHodlContracts
   getUserContractBalances()
+}
+
+function lockedStatusText(locktime: number){
+  // Timestamp-based locks (from plugin-created contracts) cannot be unlocked through the dapp
+  if(locktime >= 500_000_000) return `locked until ${formatTimestamp(locktime)} (time-based lock)`
+  if(!store.currentBlockHeight) return 'locked'
+  const blocksRemaining = locktime - store.currentBlockHeight
+  const daysLeft = Math.ceil(blocksRemaining * 10 / (60 * 24))
+  const dateEstimate = formatTimestamp(estimateBlockHeightTimestamp(locktime, store.currentBlockHeight))
+  return `locked until block ${locktime} (~${dateEstimate}, ~${daysLeft} ${daysLeft == 1 ? 'day' : 'days'} left)`
 }
 
 async function getUserContractBalances(){
@@ -114,7 +124,7 @@ async function reclaimHodlValue(locktime: number){
   console.log(signResult);
   if (!signResult) return 
 
-  const successMessage = `Succesfully reclaimed HODLed value! txid: ${signResult.signedTransactionHash}`
+  const successMessage = `Successfully reclaimed HODLed value! txid: ${signResult.signedTransactionHash}`
   alert(successMessage);
   console.log(successMessage);
 
@@ -148,6 +158,9 @@ async function reclaimHodlValue(locktime: number){
             <span v-else-if="userContractBalances && userHodlContract.locktime < store.currentBlockHeight">
               funds spendable!
             </span>
+            <span v-else>
+              {{ lockedStatusText(userHodlContract.locktime) }}
+            </span>
             <div v-if="userContractBalances && Number(userContractBalances[index]) && store.currentBlockHeight && userHodlContract.locktime < store.currentBlockHeight" style="margin-top: 10px;">
               <button @click="() => unlockHodlVault(userHodlContract.locktime)" style="cursor: pointer;">
                 Reclaim To Wallet
@@ -158,7 +171,8 @@ async function reclaimHodlValue(locktime: number){
       </div>
       <div v-else>
         No HODL contracts found... <br/>
-        Note that the dapp only checks your connected address
+        Newly created contracts appear here after their transaction confirms (~10 minutes). <br/>
+        Note that the dapp only checks your connected address — contracts created for a different address in the same wallet won't show.
       </div>
     </div>
 
