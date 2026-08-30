@@ -85,7 +85,11 @@ async function reclaimHodlValue(locktime: number){
   const contractUtxos = await hodlContract.getUtxos()
   const contractBalance = getBalance(contractUtxos)
 
-  const reclaimAmount = contractBalance - 500n - BigInt(100 * contractUtxos.length)
+  // 150 base + 200 per input stays above the 1 sat/byte relay fee for any number of inputs
+  // (~78 bytes fixed tx size, ~172 bytes per contract input with schnorr sig + redeem script)
+  const reclaimFee = 150n + 200n * BigInt(contractUtxos.length)
+  const reclaimAmount = contractBalance - reclaimFee
+  if(reclaimAmount < 546n) throw new Error("Contract balance is too small to cover the network fee for reclaiming")
   const reclaimOutput: Output = { to: store.userAddress, amount: reclaimAmount }
 
   const placeholderSig = placeholderSignature()
