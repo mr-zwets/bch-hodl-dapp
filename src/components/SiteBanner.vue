@@ -27,6 +27,7 @@ function switchNetwork(event: Event){
           <RouterLink to="/">All Contracts</RouterLink>
           <RouterLink to="/my-contracts">User Contracts</RouterLink>
           <RouterLink to="/create-contract">Create Contract</RouterLink>
+          <RouterLink to="/about">About</RouterLink>
         </nav>
       </div>
       <div class="wcContainer">
