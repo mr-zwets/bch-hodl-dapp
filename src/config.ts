@@ -1,5 +1,7 @@
 
-const network = "chipnet" as ("chipnet" | "mainnet")
+// Mainnet by default, the network selector persists a different choice and reloads the page
+const storedNetwork = localStorage.getItem('network')
+const network = (storedNetwork == 'chipnet' ? 'chipnet' : 'mainnet') as ("chipnet" | "mainnet")
 
 const connectedChain = network == "mainnet" ? "bch:bitcoincash" : "bch:bchtest";
 const requiredNamespaces = {

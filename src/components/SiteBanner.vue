@@ -1,9 +1,19 @@
 <script setup lang="ts">
 import { satsToBchAmount } from '@/utils/utils';
 import { useStore } from '../store/store'
+import { network } from '@/config'
 import wcButton from "@/components/wcButton.vue"
 
 const store = useStore()
+
+function switchNetwork(event: Event){
+  const selectedNetwork = (event.target as HTMLSelectElement).value
+  if(selectedNetwork == network) return
+  localStorage.setItem('network', selectedNetwork)
+  // The network is fixed at startup (electrum connection, walletconnect chain, provider),
+  // so switching requires a page reload
+  location.reload()
+}
 </script>
 
 <template>
@@ -21,6 +31,10 @@ const store = useStore()
       </div>
       <div class="wcContainer">
         <div class="balance">
+          <select class="networkSelect" :value="network" @change="switchNetwork">
+            <option value="mainnet">mainnet</option>
+            <option value="chipnet">chipnet</option>
+          </select>
           <span>
             <wcButton />
           </span>
@@ -43,6 +57,10 @@ const store = useStore()
 a {
   color: black;
   padding: 0;
+}
+.networkSelect {
+  margin-right: 15px;
+  cursor: pointer;
 }
 .navContainer{
   margin-left: 150px;

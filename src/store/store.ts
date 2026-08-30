@@ -94,7 +94,9 @@ export const useStore = defineStore('store', () => {
     });
 
     // get last session info from local storage & ask to re-use it
-    if (lastSession){
+    // only offer sessions matching the selected network, sessions for the
+    // other network would make signing requests fail
+    if (lastSession && lastSession.namespaces?.bch?.accounts?.[0]?.startsWith(connectedChain)){
       const addressWithNamespace = lastSession.namespaces.bch.accounts[0];
       const userAddressWc = addressWithNamespace.split(':').slice(1).join(':');
       const confirmReuse = confirm("Do you want to re-connect with the WalletConnect session for: " + userAddressWc);
