@@ -58,8 +58,14 @@ async function getUserHodlContracts(userPkh: string) {
   getUserContractBalances()
 }
 
+function isContractSpendable(locktime: number){
+  // 500,000,000 is the BIP65 threshold separating block heights from timestamps
+  if(locktime >= 500_000_000) return Date.now() / 1000 > locktime
+  if(!store.currentBlockHeight) return false
+  return locktime < store.currentBlockHeight
+}
+
 function lockedStatusText(locktime: number){
-  // Timestamp-based locks (from plugin-created contracts) cannot be unlocked through the dapp
   if(locktime >= 500_000_000) return `locked until ${formatTimestamp(locktime)} (time-based lock)`
   if(!store.currentBlockHeight) return 'locked'
   const blocksRemaining = locktime - store.currentBlockHeight
@@ -84,8 +90,21 @@ async function unlockHodlVault(locktime: number){
   }
 }
 
+// Time-based locks are enforced against median-time-past, which lags wall-clock time
+// by up to ~70 minutes, so a just-expired time lock can still be rejected by the network
+const MTP_LAG_SECONDS = 70 * 60
+
 async function reclaimHodlValue(locktime: number){
-  if(!store.userAddress || store.userUtxos == undefined || !store.currentBlockHeight) return
+  if(!store.userAddress || store.userUtxos == undefined) return
+
+  if(locktime >= 500_000_000 && Math.floor(Date.now() / 1000) - locktime < MTP_LAG_SECONDS){
+    const confirmed = confirm(
+      "This time lock only just expired. The network enforces time locks against 'median-time-past', " +
+      "which can lag up to ~70 minutes behind the clock, so the transaction may be rejected as not ready yet.\n\n" +
+      "Try to reclaim anyway? (If it fails, simply try again later)"
+    )
+    if(!confirmed) return
+  }
 
   const userPkh = convertAddressToPkh(store.userAddress)
   const hodlArtifactWithParams = constructArtifactWithParams(userPkh, BigInt(locktime));
@@ -107,7 +126,9 @@ async function reclaimHodlValue(locktime: number){
 
   const transactionBuilder = new TransactionBuilder({provider: store.provider})
 
-  transactionBuilder.setLocktime(store.currentBlockHeight)
+  // Use the contract's own locktime, which satisfies OP_CHECKLOCKTIMEVERIFY for both
+  // block-height and timestamp locks (same approach as the EC plugin)
+  transactionBuilder.setLocktime(locktime)
   // needed for typescript
   if (!hodlContract.unlock?.spend) {
     throw new Error("hodlContract.unlock.spend is undefined");
@@ -155,13 +176,13 @@ async function reclaimHodlValue(locktime: number){
             <span v-else-if="userContractBalances && Number(userContractBalances[index]) == 0">
               funds spent
             </span>
-            <span v-else-if="userContractBalances && userHodlContract.locktime < store.currentBlockHeight">
+            <span v-else-if="userContractBalances && isContractSpendable(userHodlContract.locktime)">
               funds spendable!
             </span>
             <span v-else>
               {{ lockedStatusText(userHodlContract.locktime) }}
             </span>
-            <div v-if="userContractBalances && Number(userContractBalances[index]) && store.currentBlockHeight && userHodlContract.locktime < store.currentBlockHeight" style="margin-top: 10px;">
+            <div v-if="userContractBalances && Number(userContractBalances[index]) && isContractSpendable(userHodlContract.locktime)" style="margin-top: 10px;">
               <button @click="() => unlockHodlVault(userHodlContract.locktime)" style="cursor: pointer;">
                 Reclaim To Wallet
               </button>
