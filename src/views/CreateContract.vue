@@ -16,7 +16,7 @@ async function proposeWcTransaction(){
 
   const userPkh = convertAddressToPkh(store.userAddress)
   const hodlArtifactWithParams = constructArtifactWithParams(userPkh, BigInt(locktimeInput.value));
-  const contractOptions = { provider: store.provider, addressType: 'p2sh20' } as const
+  const contractOptions = { provider: store.provider, contractType: 'p2sh20' } as const
   const newHodlContract = new Contract(hodlArtifactWithParams, [], contractOptions);
 
   const userBchUtxos = store.userUtxos.filter(utxo =>!utxo.token)

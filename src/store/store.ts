@@ -3,10 +3,9 @@ import { computed, ref, watch } from 'vue'
 import SignClient from '@walletconnect/sign-client';
 import { WalletConnectModal } from '@walletconnect/modal';
 import { fetchHodlContracts } from '@/utils/chaingraph'
-import type { OnChainDataHodlContract } from '../interfaces/interfaces'
+import type { OnChainDataHodlContract, SignedTxObject } from '../interfaces/interfaces'
 import { wcModalConfig, projectId, wcMetadata, connectedChain, network } from "@/config";
 import { ElectrumNetworkProvider, type Utxo, type WcTransactionObject } from 'cashscript';
-import type { signedTxObject } from '@/utils/wcUtils';
 import { stringify } from '@bitauth/libauth';
 
 export const useStore = defineStore('store', () => {
@@ -100,7 +99,7 @@ export const useStore = defineStore('store', () => {
     signingClient.value = signClient
   }
 
-  async function signTransaction(wcTransactionObj: WcTransactionObject): Promise<signedTxObject | undefined> {
+  async function signTransaction(wcTransactionObj: WcTransactionObject): Promise<SignedTxObject | undefined> {
     console.log('signTransaction')
     try {
       const result = await signingClient.value?.request({
@@ -111,7 +110,7 @@ export const useStore = defineStore('store', () => {
           params: JSON.parse(stringify(wcTransactionObj)),
         },
       });
-      return result as signedTxObject;
+      return result as SignedTxObject;
     } catch (error) {
       console.error('Error signing transaction:', error)
       return undefined;

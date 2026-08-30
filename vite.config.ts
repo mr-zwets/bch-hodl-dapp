@@ -5,16 +5,8 @@ import vue from '@vitejs/plugin-vue'
 
 // https://vite.dev/config/
 export default defineConfig({
-  esbuild: {
-    supported: {
-      // Browsers can handle top-level-await features.
-      'top-level-await': true
-    },
-  },
-  optimizeDeps: {
-    esbuildOptions: {
-      target: 'esnext',
-    },
+  build: {
+    target: 'esnext',
   },
   plugins: [
     vue(),

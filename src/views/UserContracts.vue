@@ -28,7 +28,7 @@ onMounted(async () => {
 
 function compileHodlContract(locktime: number | string, userPkh: string) {
   const hodlArtifactWithParams = constructArtifactWithParams(userPkh, BigInt(locktime) );
-  const newHodlContract = new Contract(hodlArtifactWithParams, [], { provider: store.provider, addressType: 'p2sh20' });
+  const newHodlContract = new Contract(hodlArtifactWithParams, [], { provider: store.provider, contractType: 'p2sh20' });
   return newHodlContract
 }
 
@@ -66,7 +66,7 @@ async function unlockHodlVault(locktime: number){
 
   const userPkh = convertAddressToPkh(store.userAddress)
   const hodlArtifactWithParams = constructArtifactWithParams(userPkh, BigInt(locktime));
-  const contractOptions = { provider: store.provider, addressType: 'p2sh20' } as const
+  const contractOptions = { provider: store.provider, contractType: 'p2sh20' } as const
   const hodlContract = new Contract(hodlArtifactWithParams, [], contractOptions);
 
   const contractUtxos = await hodlContract.getUtxos()
