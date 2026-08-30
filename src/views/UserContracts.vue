@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import { Contract, type Output, placeholderPublicKey, placeholderSignature, TransactionBuilder  } from 'cashscript';
 import { hexToBin, lockingBytecodeToCashAddress} from '@bitauth/libauth';
 import { constructArtifactWithParams, convertAddressToPkh, estimateBlockHeightTimestamp, formatTimestamp, getBalance, parseOpreturn, satsToBchAmount } from '../utils/utils';
@@ -20,6 +20,15 @@ onMounted(async () => {
     store.fetchStatus.allHodlContracts,
     store.fetchStatus.currentBlockHeight
   ])
+  await loadUserContracts()
+})
+
+// Reload the user's contracts whenever the contract scan refreshes (after create/reclaim)
+watch(() => store.allHodlContracts, async () => {
+  await loadUserContracts()
+})
+
+async function loadUserContracts(){
   if(!store.userAddress) return
   try {
     const userPkh = convertAddressToPkh(store.userAddress)
@@ -28,7 +37,7 @@ onMounted(async () => {
     console.error(error)
     alert(error instanceof Error ? error.message : String(error))
   }
-})
+}
 
 function compileHodlContract(locktime: number | string, userPkh: string) {
   const hodlArtifactWithParams = constructArtifactWithParams(userPkh, BigInt(locktime) );
@@ -37,21 +46,31 @@ function compileHodlContract(locktime: number | string, userPkh: string) {
 }
 
 async function getUserHodlContracts(userPkh: string) {
-  const listUserHodlContracts = []
+  const listUserHodlContracts: HodlContract[] = []
   if(store.allHodlContracts == undefined) return
   for (const chaingraphItem of store.allHodlContracts) {
-    const opreturnData = chaingraphItem.opReturn
-    const locktime = parseOpreturn(opreturnData)
-    const newHodlContract = compileHodlContract(locktime, userPkh) as HodlContract
-    const contractOutput = chaingraphItem.outputs.find(output => output.locking_bytecode.startsWith('a9'))
-    const prefix = network == 'mainnet' ? 'bitcoincash' : 'bchtest'
-    const hodlContractLockingBytecode = hexToBin(contractOutput!.locking_bytecode)
-    const hodlContractAddress = lockingBytecodeToCashAddress({ prefix, bytecode: hodlContractLockingBytecode})
-    // should not happen
-    if(typeof hodlContractAddress == 'string') continue
-    if(newHodlContract.address == hodlContractAddress.address){
-    newHodlContract.locktime = Number(locktime)
-      listUserHodlContracts.push(newHodlContract)
+    // Per-item try/catch: anyone can post an opreturn with the hodl prefix, so a single
+    // malformed entry should be skipped instead of breaking the whole page
+    try {
+      const opreturnData = chaingraphItem.opReturn
+      const locktime = parseOpreturn(opreturnData)
+      const newHodlContract = compileHodlContract(locktime, userPkh) as HodlContract
+      const contractOutput = chaingraphItem.outputs.find(output => output.locking_bytecode.startsWith('a9'))
+      const prefix = network == 'mainnet' ? 'bitcoincash' : 'bchtest'
+      const hodlContractLockingBytecode = hexToBin(contractOutput!.locking_bytecode)
+      const hodlContractAddress = lockingBytecodeToCashAddress({ prefix, bytecode: hodlContractLockingBytecode})
+      // should not happen
+      if(typeof hodlContractAddress == 'string') continue
+      if(newHodlContract.address == hodlContractAddress.address){
+        // A contract funded multiple times has multiple funding txs with the same address,
+        // only list it once (reclaiming spends all its utxos in one transaction)
+        const alreadyListed = listUserHodlContracts.some(existingContract => existingContract.address == newHodlContract.address)
+        if(alreadyListed) continue
+        newHodlContract.locktime = Number(locktime)
+        listUserHodlContracts.push(newHodlContract)
+      }
+    } catch (error) {
+      console.error('Skipping unparseable hodl contract entry:', error)
     }
   }
   userHodlContracts.value = listUserHodlContracts
