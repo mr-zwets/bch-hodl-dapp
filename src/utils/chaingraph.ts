@@ -44,7 +44,7 @@ export async function fetchHodlContracts(){
     outputs: output.transaction.outputs.map((outputInfo: any) => ({
       locking_bytecode: outputInfo.locking_bytecode.slice(2),
       value_satoshis: outputInfo.value_satoshis,
-      spent: !outputInfo.spent_by.length
+      spent: outputInfo.spent_by.length > 0
     }))
   }));
   return listContracts as OnChainDataHodlContract[]

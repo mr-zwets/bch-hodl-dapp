@@ -10,12 +10,38 @@ const locktimeInput = ref('')
 const bchAmountInput = ref('')
 
 async function proposeWcTransaction(){
+  try {
+    await createHodlContract()
+  } catch (error) {
+    console.error(error)
+    alert(error instanceof Error ? error.message : String(error))
+  }
+}
+
+async function createHodlContract(){
   if(!store.userAddress || store.userUtxos == undefined) return
 
-  const amountSatsNewContract = BigInt(Number(bchAmountInput.value) * 100_000_000)
+  const bchAmount = Number(bchAmountInput.value)
+  if(Number.isNaN(bchAmount) || bchAmount <= 0) throw new Error("Invalid BCH amount to lock")
+  // Math.round to avoid floating point imprecision like 0.29 * 1e8 === 28999999.999999996
+  const amountSatsNewContract = BigInt(Math.round(bchAmount * 100_000_000))
+
+  const locktime = Number(locktimeInput.value)
+  if(!Number.isInteger(locktime) || locktime <= 0){
+    throw new Error("Invalid locktime: enter a whole number block height")
+  }
+  // Values >= 500,000,000 are interpreted as unix timestamps by OP_CHECKLOCKTIMEVERIFY
+  if(locktime >= 500_000_000){
+    throw new Error("Locktime must be a block height (below 500,000,000), not a timestamp")
+  }
+  if(store.currentBlockHeight && locktime <= store.currentBlockHeight){
+    throw new Error(
+      `Locktime ${locktime} is not above the current block height (${store.currentBlockHeight}), so the funds would not be locked`
+    )
+  }
 
   const userPkh = convertAddressToPkh(store.userAddress)
-  const hodlArtifactWithParams = constructArtifactWithParams(userPkh, BigInt(locktimeInput.value));
+  const hodlArtifactWithParams = constructArtifactWithParams(userPkh, BigInt(locktime));
   const contractOptions = { provider: store.provider, contractType: 'p2sh20' } as const
   const newHodlContract = new Contract(hodlArtifactWithParams, [], contractOptions);
 
@@ -41,7 +67,7 @@ async function proposeWcTransaction(){
     requiredAmountSats += feePerUserInput
   }
 
-  const opreturnData = ["hodl", newHodlContract.address, locktimeInput.value]
+  const opreturnData = ["hodl", newHodlContract.address, locktime.toString()]
 
   const contractOutput: Output = { to: newHodlContract.address, amount: amountSatsNewContract }
   const changeAmount =  userInputTotal - requiredAmountSats

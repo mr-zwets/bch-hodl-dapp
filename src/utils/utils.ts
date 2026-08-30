@@ -28,7 +28,11 @@ export function parseOpreturn(opreturnData: string) {
 
 export function convertAddressToPkh(userAddress: string){
   const decodeAddressObj = decodeCashAddress(userAddress)
-  if(typeof decodeAddressObj == 'string') throw("error decodeCashAddress()")
+  if(typeof decodeAddressObj == 'string') throw new Error("Failed to decode user address: " + decodeAddressObj)
+  // A p2sh address payload is a script hash, using it as a pubkey hash would make the contract unspendable
+  if(decodeAddressObj.type !== 'p2pkh' && decodeAddressObj.type !== 'p2pkhWithTokens'){
+    throw new Error(`Connected address is not a P2PKH address (got type '${decodeAddressObj.type}')`)
+  }
   const userPkh = decodeAddressObj.payload
   const userPkhHex = binToHex(userPkh)
   return userPkhHex

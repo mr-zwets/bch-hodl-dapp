@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
 import { Contract, type Output, placeholderPublicKey, placeholderSignature, TransactionBuilder  } from 'cashscript';
-import { binToHex, decodeCashAddress, hexToBin, lockingBytecodeToCashAddress} from '@bitauth/libauth';
+import { hexToBin, lockingBytecodeToCashAddress} from '@bitauth/libauth';
 import { constructArtifactWithParams, convertAddressToPkh, formatTimestamp, getBalance, parseOpreturn, satsToBchAmount } from '../utils/utils';
 import { useStore } from '../store/store';
 import { network } from '@/config';
@@ -21,9 +21,13 @@ onMounted(async () => {
     store.fetchStatus.currentBlockHeight
   ])
   if(!store.userAddress) return
-  const userPkh = decodeCashAddress(store.userAddress)
-  if(typeof userPkh == 'string') return
-  await getUserHodlContracts(binToHex(userPkh.payload))
+  try {
+    const userPkh = convertAddressToPkh(store.userAddress)
+    await getUserHodlContracts(userPkh)
+  } catch (error) {
+    console.error(error)
+    alert(error instanceof Error ? error.message : String(error))
+  }
 })
 
 function compileHodlContract(locktime: number | string, userPkh: string) {
@@ -62,6 +66,15 @@ async function getUserContractBalances(){
 }
 
 async function unlockHodlVault(locktime: number){
+  try {
+    await reclaimHodlValue(locktime)
+  } catch (error) {
+    console.error(error)
+    alert(error instanceof Error ? error.message : String(error))
+  }
+}
+
+async function reclaimHodlValue(locktime: number){
   if(!store.userAddress || store.userUtxos == undefined || !store.currentBlockHeight) return
 
   const userPkh = convertAddressToPkh(store.userAddress)
