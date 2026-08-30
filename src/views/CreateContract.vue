@@ -33,6 +33,8 @@ async function createHodlContract(){
   if(Number.isNaN(bchAmount) || bchAmount <= 0) throw new Error("Invalid BCH amount to lock")
   // Math.round to avoid floating point imprecision like 0.29 * 1e8 === 28999999.999999996
   const amountSatsNewContract = BigInt(Math.round(bchAmount * 100_000_000))
+  // Same minimum as the EC plugin, safely above the ~896 sats needed to reclaim (546 dust + fee)
+  if(amountSatsNewContract < 1000n) throw new Error("Minimum amount to lock is 1000 satoshis (0.00001 BCH)")
 
   const locktime = Number(locktimeInput.value)
   if(!Number.isInteger(locktime) || locktime <= 0){
@@ -67,7 +69,11 @@ async function createHodlContract(){
 
   // Calculate the amount of BCH needed for the transaction
   const feePerUserInput = 180n
-  let requiredAmountSats = amountSatsNewContract + 400n
+  // Always add a change output back to the owner address (minimum 546 sats, the dust limit)
+  // so the funding tx reveals the owner address on-chain: the EC plugin discovers contracts
+  // from the owner address in the outputs, and the dapp verifies unspent contracts from it
+  const minChangeAmount = 546n
+  let requiredAmountSats = amountSatsNewContract + 400n + minChangeAmount
 
   if(userBchBalance < requiredAmountSats) throw new Error("Wallet does not have enough BCH to fund contract")
 
@@ -84,6 +90,11 @@ async function createHodlContract(){
     requiredAmountSats += feePerUserInput
   }
 
+  // Re-check because the required amount grew with the fee for each added input
+  if(userInputTotal < requiredAmountSats){
+    throw new Error("Wallet does not have enough BCH to fund the contract plus network fees")
+  }
+
   // Match the EC hodl plugin's opreturn format so plugin users can also discover dapp-created
   // contracts: "hodl", "<42-char unprefixed address> <version>", "<locktime as decimal string>"
   // The plugin parses the address as exactly 42 characters followed by a version number
@@ -91,7 +102,8 @@ async function createHodlContract(){
   const opreturnData = ["hodl", `${unprefixedAddress} 1`, locktime.toString()]
 
   const contractOutput: Output = { to: newHodlContract.address, amount: amountSatsNewContract }
-  const changeAmount =  userInputTotal - requiredAmountSats
+  // requiredAmountSats reserved minChangeAmount, so changeAmount is always >= 546 sats
+  const changeAmount = userInputTotal - requiredAmountSats + minChangeAmount
   const changeOutput: Output = { to: store.userAddress, amount: changeAmount }
 
   const placeholderUnlocker = placeholderP2PKHUnlocker(store.userAddress)
@@ -100,7 +112,7 @@ async function createHodlContract(){
   transactionBuilder.addInputs(userInputUtxos, placeholderUnlocker)
   transactionBuilder.addOpReturnOutput(opreturnData)
   transactionBuilder.addOutput(contractOutput)
-  if(changeAmount > 550n) transactionBuilder.addOutput(changeOutput)
+  transactionBuilder.addOutput(changeOutput)
 
   const wcTransactionObj = transactionBuilder.generateWcTransactionObject({
     broadcast: true,
