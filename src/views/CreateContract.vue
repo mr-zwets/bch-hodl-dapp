@@ -67,7 +67,11 @@ async function createHodlContract(){
     requiredAmountSats += feePerUserInput
   }
 
-  const opreturnData = ["hodl", newHodlContract.address, locktime.toString()]
+  // Match the EC hodl plugin's opreturn format so plugin users can also discover dapp-created
+  // contracts: "hodl", "<42-char unprefixed address> <version>", "<locktime as decimal string>"
+  // The plugin parses the address as exactly 42 characters followed by a version number
+  const unprefixedAddress = newHodlContract.address.split(':')[1]
+  const opreturnData = ["hodl", `${unprefixedAddress} 1`, locktime.toString()]
 
   const contractOutput: Output = { to: newHodlContract.address, amount: amountSatsNewContract }
   const changeAmount =  userInputTotal - requiredAmountSats
