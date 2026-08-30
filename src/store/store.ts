@@ -6,6 +6,7 @@ import { fetchHodlContracts } from '@/utils/chaingraph'
 import type { OnChainDataHodlContract, SignedTxObject } from '../interfaces/interfaces'
 import { wcModalConfig, projectId, wcMetadata, connectedChain, network } from "@/config";
 import { ElectrumNetworkProvider, type Utxo, type WcTransactionObject } from 'cashscript';
+import { ElectrumClient, type ElectrumNetworkOptions, type RPCNotification } from '@electrum-cash/network';
 import { stringify } from '@bitauth/libauth';
 
 export const useStore = defineStore('store', () => {
@@ -33,13 +34,20 @@ export const useStore = defineStore('store', () => {
     currentBlockHeight: null as Promise<void> | null
   })
 
-  // Initialise CashScript ElectrumNetworkProvider
-  const provider = new ElectrumNetworkProvider(network);
+  // Initialise the CashScript ElectrumNetworkProvider with an explicitly constructed
+  // ElectrumClient (same server and options as the cashscript defaults) so the same
+  // connection can also be used to subscribe to block header notifications.
+  // Note: disableBrowserVisibilityHandling is a runtime option not yet in the published types
+  const electrumServer = network == 'mainnet' ? 'bch.imaginary.cash' : 'chipnet.bch.ninja'
+  const electrumOptions = { disableBrowserVisibilityHandling: true } as ElectrumNetworkOptions
+  const electrumClient = new ElectrumClient('BCH Hodl Dapp', '1.4.1', electrumServer, electrumOptions)
+  const provider = new ElectrumNetworkProvider(network, { electrum: electrumClient, manualConnectionManagement: true });
+  const electrumConnected = provider.connect()
 
   initializeWalletConnect()
 
   fetchStatus.value.allHodlContracts = scanHodlContracts()
-  fetchStatus.value.currentBlockHeight = getCurrentBlockHeight()
+  fetchStatus.value.currentBlockHeight = subscribeToBlockHeight()
 
   function waitForConnection(): Promise<void> {
     if (walletConnected.value) return Promise.resolve()
@@ -124,6 +132,7 @@ export const useStore = defineStore('store', () => {
 
   watch(userAddress, async() => {
     if(!userAddress.value) return
+    await electrumConnected
     userUtxos.value = await provider.getUtxos(userAddress.value)
   })
 
@@ -132,8 +141,17 @@ export const useStore = defineStore('store', () => {
     allHodlContracts.value = chaingraphResult
   }
 
-  async function getCurrentBlockHeight() {
-    currentBlockHeight.value = await provider.getBlockHeight()
+  // Keep currentBlockHeight up to date with a block headers subscription.
+  // The initial subscription response arrives as a notification too, and the client
+  // automatically restores the subscription when the connection is re-established
+  async function subscribeToBlockHeight() {
+    await electrumConnected
+    electrumClient.on('notification', (notification: RPCNotification) => {
+      if(notification.method != 'blockchain.headers.subscribe') return
+      const blockHeader = notification.params?.[0] as { height: number } | undefined
+      if(blockHeader?.height) currentBlockHeight.value = blockHeader.height
+    })
+    await electrumClient.subscribe('blockchain.headers.subscribe')
   }
 
   return {
