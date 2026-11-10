@@ -33,11 +33,21 @@
   --color-heading: var(--vt-c-text-light-1);
   --color-text: var(--vt-c-text-light-1);
 
+  --color-banner: #f1f8fd;
+  --color-banner-border: rgba(44, 149, 214, 0.16);
+
   --section-gap: 160px;
 }
 
+/* the theme is set as data-theme on <html> (see index.html and useTheme.ts),
+   without it the OS preference applies */
+:root {
+  color-scheme: light;
+}
+
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
     --color-background: var(--vt-c-black);
     --color-background-soft: var(--vt-c-black-soft);
     --color-background-mute: var(--vt-c-black-mute);
@@ -47,7 +57,26 @@
 
     --color-heading: var(--vt-c-text-dark-1);
     --color-text: var(--vt-c-text-dark-2);
+
+    --color-banner: #172028;
+    --color-banner-border: rgba(44, 149, 214, 0.22);
   }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --color-background: var(--vt-c-black);
+  --color-background-soft: var(--vt-c-black-soft);
+  --color-background-mute: var(--vt-c-black-mute);
+
+  --color-border: var(--vt-c-divider-dark-2);
+  --color-border-hover: var(--vt-c-divider-dark-1);
+
+  --color-heading: var(--vt-c-text-dark-1);
+  --color-text: var(--vt-c-text-dark-2);
+
+  --color-banner: #172028;
+  --color-banner-border: rgba(44, 149, 214, 0.22);
 }
 
 *,

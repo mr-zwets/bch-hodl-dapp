@@ -69,36 +69,109 @@ watch(() => store.allHodlContracts, () => {
   </div>
   <div v-if="store.allHodlContracts != undefined && tvlContracts != undefined">
     <div v-if="network == 'chipnet'" style="margin-bottom: 10px;">Connected to Chipnet, a test network — tBCH has no real value</div>
-    <div>Active HODL contracts: {{ activeContracts?.length }}</div>
-    <div>Current TVL HODL contracts: 
-      <span v-if="tvlActiveContracts != undefined">
-        {{ satsToBchAmount(tvlActiveContracts).toLocaleString('en-US', { maximumFractionDigits: 0 }) }} {{ network == "mainnet" ? "BCH" : "tBCH"  }}
-      </span>
+
+    <div class="statGrid">
+      <div class="card">
+        <div class="statLabel">Active HODL contracts</div>
+        <div class="statValue">{{ activeContracts?.length }}</div>
+      </div>
+      <div class="card">
+        <div class="statLabel">Current TVL HODL contracts</div>
+        <div class="statValue" v-if="tvlActiveContracts != undefined">
+          {{ satsToBchAmount(tvlActiveContracts).toLocaleString('en-US', { maximumFractionDigits: 0 }) }} {{ network == "mainnet" ? "BCH" : "tBCH"  }}
+        </div>
+      </div>
+      <div class="card">
+        <div class="statLabel">Total HODL contracts created</div>
+        <div class="statValue">{{ verifiedContracts }}</div>
+      </div>
+      <div class="card">
+        <div class="statLabel">Total TVL HODL contracts</div>
+        <div class="statValue">
+          {{ satsToBchAmount(tvlContracts).toLocaleString('en-US', { maximumFractionDigits: 0 }) }} {{ network == "mainnet" ? "BCH" : "tBCH"  }}
+        </div>
+      </div>
     </div>
-    <br/>
-    <div>Total HODL contract created: {{ verifiedContracts }}</div>
-    <div>Total TVL HODL contracts:
-      {{ satsToBchAmount(tvlContracts).toLocaleString('en-US', { maximumFractionDigits: 0 }) }} {{ network == "mainnet" ? "BCH" : "tBCH"  }}
-    </div>
-    <div v-if="unverifiedContracts" style="margin-top: 10px;">
+    <div v-if="unverifiedContracts" class="note">
       Excluded {{ unverifiedContracts }} {{ unverifiedContracts > 1 ? 'entries' : 'entry' }} which could not be verified on-chain
     </div>
 
-    <div v-if="displayContracts" style="margin-top: 20px;">
-      <h3 style="margin: 4px 0px;">Biggest Value</h3>
-      <div style="display: flex; gap: 50px; margin-bottom: 20px;">
-        <div v-for="largestContract in displayContracts.biggestValue" :key="largestContract.satoshis">
-          <div>Time Lock: {{ formatTimestamp(largestContract.timelock) }}</div>
-          <div>Value: {{ satsToBchAmount(largestContract.satoshis) }} {{ network == "mainnet" ? "BCH" : "tBCH"  }}</div>
+    <div v-if="displayContracts">
+      <h3 class="sectionTitle">Biggest Value</h3>
+      <div class="contractGrid">
+        <div class="card" v-for="(largestContract, index) in displayContracts.biggestValue" :key="index">
+          <div class="rank">#{{ index + 1 }}</div>
+          <div class="row"><span class="statLabel">Value</span> <strong>{{ satsToBchAmount(largestContract.satoshis) }} {{ network == "mainnet" ? "BCH" : "tBCH"  }}</strong></div>
+          <div class="row"><span class="statLabel">Time Lock</span> {{ formatTimestamp(largestContract.timelock) }}</div>
         </div>
       </div>
-      <h3 style="margin: 4px 0px;">Longest Time Lock</h3>
-      <div style="display: flex; gap: 50px;">
-        <div v-for="longestTimeLock in displayContracts.longestTimeLocks" :key="longestTimeLock.timelock">
-          <div>Time Lock: {{ formatTimestamp(longestTimeLock.timelock) }}</div>
-          <div>Value: {{ satsToBchAmount(longestTimeLock.satoshis) }} {{ network == "mainnet" ? "BCH" : "tBCH"  }}</div>
+      <h3 class="sectionTitle">Longest Time Lock</h3>
+      <div class="contractGrid">
+        <div class="card" v-for="(longestTimeLock, index) in displayContracts.longestTimeLocks" :key="index">
+          <div class="rank">#{{ index + 1 }}</div>
+          <div class="row"><span class="statLabel">Time Lock</span> <strong>{{ formatTimestamp(longestTimeLock.timelock) }}</strong></div>
+          <div class="row"><span class="statLabel">Value</span> {{ satsToBchAmount(longestTimeLock.satoshis) }} {{ network == "mainnet" ? "BCH" : "tBCH"  }}</div>
         </div>
       </div>
     </div>
   </div>
 </template>
+
+<style scoped>
+.card {
+  position: relative;
+  padding: 14px 16px;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  background: var(--color-background-soft);
+}
+.statGrid,
+.contractGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+  max-width: 960px;
+}
+.contractGrid {
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+}
+.statLabel {
+  font-size: 13px;
+  opacity: 0.8;
+}
+.statValue {
+  margin-top: 2px;
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--color-heading);
+}
+.note {
+  margin-top: 10px;
+  font-size: 13px;
+  opacity: 0.8;
+}
+.sectionTitle {
+  margin: 28px 0 10px 0;
+  color: var(--color-heading);
+}
+.rank {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #2c95d6;
+}
+.row {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+}
+.row .statLabel {
+  min-width: 70px;
+}
+strong {
+  font-weight: 600;
+  color: var(--color-heading);
+}
+</style>

@@ -34,16 +34,43 @@ async function disconnectWallet(){
 </script>
 
 <template>
-  <button @click="openWalletConnect" class="hover" v-if="!store.walletConnected ">
+  <button @click="openWalletConnect" class="wcButton" v-if="!store.walletConnected">
     Connect wallet
   </button>
-  <button @click="disconnectWallet" class="hover" v-else>
+  <button @click="disconnectWallet" class="wcButton secondary" v-else>
     Disconnect
   </button>
 </template>
 
 <style scoped>
-  .hover{
-    cursor: pointer;
-  }
+.wcButton {
+  height: 32px;
+  padding: 0 16px;
+  border: 1px solid #2c95d6;
+  border-radius: 16px;
+  background: #2c95d6;
+  color: #fff;
+  font: inherit;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+.wcButton:hover {
+  background: #2380ba;
+  border-color: #2380ba;
+}
+.wcButton:focus-visible {
+  outline: 2px solid #2c95d6;
+  outline-offset: 2px;
+}
+/* disconnect is the less prominent action, so it is outlined */
+.wcButton.secondary {
+  background: transparent;
+  border-color: var(--color-border-hover);
+  color: var(--color-heading);
+}
+.wcButton.secondary:hover {
+  background: var(--color-background-mute);
+  border-color: var(--color-heading);
+}
 </style>
